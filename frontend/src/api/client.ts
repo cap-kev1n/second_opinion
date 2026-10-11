@@ -12,13 +12,21 @@ import type {
   ApiError,
 } from '../types/api';
 
-const DEFAULT_BASE_URL = 'http://localhost:8000';
+// On deployed Vercel origins or with a local dev proxy, relative paths ('') allow requests to route through Vercel rewrites.
+// If VITE_API_BASE_URL is set, it will be prioritized. In standalone development without proxy, localhost:8000 is used.
+const DEFAULT_BASE_URL = import.meta.env.DEV ? 'http://localhost:8000' : '';
 
 export class ApiClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || (import.meta.env.VITE_API_BASE_URL as string) || DEFAULT_BASE_URL;
+    if (baseUrl !== undefined) {
+      this.baseUrl = baseUrl;
+    } else if (import.meta.env.VITE_API_BASE_URL !== undefined && import.meta.env.VITE_API_BASE_URL !== '') {
+      this.baseUrl = import.meta.env.VITE_API_BASE_URL as string;
+    } else {
+      this.baseUrl = DEFAULT_BASE_URL;
+    }
   }
 
   public getBaseUrl(): string {
@@ -29,7 +37,7 @@ export class ApiClient {
    * Health check endpoint to verify backend connectivity.
    */
   async checkHealth(): Promise<HealthResponse> {
-    const response = await fetch(`${this.baseUrl}/health`, {
+    const response = await fetch(`${this.baseUrl}/api/health`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

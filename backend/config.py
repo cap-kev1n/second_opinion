@@ -109,7 +109,11 @@ settings = Settings()
 
 def get_data_dir() -> Path:
     """Return the absolute path to the backend data directory and ensure it exists."""
-    base_dir = Path(__file__).resolve().parent
-    data_dir = base_dir / "data"
+    import os
+    if os.environ.get("VERCEL"):
+        data_dir = Path("/tmp/data")
+    else:
+        base_dir = Path(__file__).resolve().parent
+        data_dir = base_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir

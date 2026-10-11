@@ -32,10 +32,11 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# CORS Configuration - restricted to Vite development origin
+# CORS Configuration - restricted to Vite development origin and Vercel domains
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin],
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
