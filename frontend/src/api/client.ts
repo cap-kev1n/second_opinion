@@ -130,6 +130,34 @@ export class ApiClient {
   }
 
   /**
+   * Fetches and attaches a website URL reference document to an existing run.
+   */
+  async attachUrlSource(runId: string, url: string, title?: string): Promise<SourceResponse> {
+    const response = await fetch(`${this.baseUrl}/api/runs/${runId}/sources/url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        url: url.trim(),
+        title: title?.trim() || '',
+        source_type: 'url',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = (await response.json().catch(() => null)) as ApiError | null;
+      if (response.status === 409) {
+        throw new Error(errorData?.detail || 'Cannot attach URL source while run is actively processing.');
+      }
+      throw new Error(errorData?.detail || `URL source attachment failed (${response.status})`);
+    }
+
+    return response.json();
+  }
+
+  /**
    * Retrieves lifecycle status for an existing verification run.
    */
   async getRunStatus(runId: string): Promise<RunStatusResponse> {

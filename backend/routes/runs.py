@@ -1,15 +1,17 @@
 """Routes for managing verification runs, claim extraction, and auditable reports."""
 
 import hashlib
+import json
 import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status, File, UploadFile, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, status, File, UploadFile, Form, Body
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models.db_models import Run, Source, Claim, SourceChunk, Evidence, QuoteAudit
 from models.schemas import (
     RunCreateRequest,
+    SourceCreateRequest,
     RunStatusResponse,
     VerificationReportResponse,
     ProcessingSummary,
@@ -35,6 +37,7 @@ from services.pdf_ingestion import (
     read_upload_file_bounded,
     cleanup_pdf_file,
 )
+from services.url_ingestion import extract_content_from_url
 from config import settings
 
 router = APIRouter(prefix="/runs", tags=["Runs"])
@@ -71,12 +74,7 @@ def create_run(
     # Validate each source
     prepared_sources: List[dict] = []
     for idx, src in enumerate(payload.sources):
-        clean_title = src.title.strip()
-        if not clean_title:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Source #{idx + 1} title cannot be empty or whitespace.",
-            )
+        clean_title = (src.title or "").strip()
 
         # Reject unsupported source types explicitly
         if src.source_type == SourceType.PDF:
@@ -84,18 +82,30 @@ def create_run(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="PDF sources must be uploaded via the dedicated multipart upload endpoints ('POST /api/runs/upload-pdf' or 'POST /api/runs/{run_id}/sources/pdf').",
             )
-        elif src.source_type == SourceType.URL:
+        elif src.source_type not in (SourceType.TEXT, SourceType.AI_CROSSCHECK, SourceType.URL):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Web URL sources are not supported. Please provide direct text content.",
-            )
-        elif src.source_type not in (SourceType.TEXT, SourceType.AI_CROSSCHECK):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported source type '{src.source_type}'. Only 'text' and 'ai_crosscheck' are currently accepted.",
+                detail=f"Unsupported source type '{src.source_type}'. Only 'text', 'pdf', 'url', and 'ai_crosscheck' are accepted.",
             )
 
-        if src.source_type == SourceType.AI_CROSSCHECK:
+        ext_meta = None
+        if src.source_type == SourceType.URL:
+            url_str = (src.url or src.content or "").strip()
+            if not url_str:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Source #{idx + 1} marked as 'url' must provide a valid target web address in 'url' or 'content'.",
+                )
+            result = extract_content_from_url(url_str, clean_title)
+            clean_title = result.source_title
+            raw_content = result.raw_content
+            content_hash = result.content_hash
+            content_len = result.content_length
+            ext_meta = json.dumps({"url": result.url, "title": result.source_title})
+            proc_status = SourceProcessingStatus.SUCCESS.value
+        elif src.source_type == SourceType.AI_CROSSCHECK:
+            if not clean_title:
+                clean_title = "Autonomous AI Cross-Check Dossier"
             raw_content = (src.content or "").strip()
             if not raw_content:
                 import asyncio
@@ -108,8 +118,15 @@ def create_run(
                         f"Topic Overview:\n{clean_answer}\n\n"
                         f"Autonomous verification dossier compiled for factual cross-examination."
                     )
-            clean_title = clean_title or "Autonomous AI Cross-Check Dossier"
+            content_hash = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
+            content_len = len(raw_content)
+            proc_status = SourceProcessingStatus.PENDING.value
         else:
+            if not clean_title:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Source #{idx + 1} title cannot be empty or whitespace.",
+                )
             # Validate text content
             if not src.content or not src.content.strip():
                 raise HTTPException(
@@ -117,14 +134,18 @@ def create_run(
                     detail=f"Source '{clean_title}' must contain non-empty text content.",
                 )
             raw_content = src.content
-        content_hash = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
+            content_hash = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
+            content_len = len(raw_content)
+            proc_status = SourceProcessingStatus.PENDING.value
+
         prepared_sources.append({
             "title": clean_title,
             "source_type": src.source_type.value,
             "raw_content": raw_content,
-            "content_length": len(raw_content),
+            "content_length": content_len,
             "content_hash": content_hash,
-            "processing_status": SourceProcessingStatus.PENDING.value,
+            "extraction_metadata": ext_meta,
+            "processing_status": proc_status,
         })
 
     # Create and persist Run record
@@ -146,6 +167,7 @@ def create_run(
             raw_content=src_data["raw_content"],
             content_length=src_data["content_length"],
             content_hash=src_data["content_hash"],
+            extraction_metadata=src_data.get("extraction_metadata"),
             processing_status=src_data["processing_status"],
             created_at=utc_now(),
         )
@@ -367,6 +389,96 @@ async def upload_pdf_source(
 
 
 @router.post(
+    "/{run_id}/sources/url",
+    response_model=SourceResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Attach a website URL reference document to an existing run",
+)
+def attach_url_source(
+    run_id: str,
+    payload: SourceCreateRequest = Body(...),
+    db: Session = Depends(get_db),
+) -> SourceResponse:
+    """Fetch and attach a website URL reference document to an existing run."""
+    run = db.query(Run).filter(Run.id == run_id).first()
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Verification run '{run_id}' was not found.",
+        )
+
+    if run.current_stage in ["extracting_claims", "retrieving_evidence", "assessing_claims"]:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Cannot attach sources while run stage '{run.current_stage}' is currently processing.",
+        )
+
+    url_str = (payload.url or payload.content or "").strip()
+    if not url_str:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Valid target website URL must be provided in 'url' or 'content'.",
+        )
+
+    result = extract_content_from_url(url_str, payload.title)
+    source_id = str(uuid.uuid4())
+
+    new_source = Source(
+        id=source_id,
+        run_id=run.id,
+        title=result.source_title,
+        source_type=SourceType.URL.value,
+        raw_content=result.raw_content,
+        content_length=result.content_length,
+        content_hash=result.content_hash,
+        extraction_metadata=json.dumps({"url": result.url, "title": result.source_title}),
+        processing_status=SourceProcessingStatus.SUCCESS.value,
+        created_at=utc_now(),
+    )
+    db.add(new_source)
+
+    # Invalidate existing evidence and previous claim assessments
+    claim_ids = [c.id for c in run.claims]
+    if claim_ids:
+        db.query(Evidence).filter(Evidence.claim_id.in_(claim_ids)).delete(synchronize_session=False)
+
+    source_ids = [s.id for s in run.sources]
+    if source_ids:
+        db.query(SourceChunk).filter(SourceChunk.source_id.in_(source_ids)).delete(synchronize_session=False)
+
+    db.query(QuoteAudit).filter(QuoteAudit.run_id == run_id).delete(synchronize_session=False)
+
+    for c in run.claims:
+        c.verdict = None
+        c.assessment_status = AssessmentStatus.PENDING.value
+        c.reasoning = None
+        c.limitations = None
+
+    run.current_stage = "awaiting_evidence"
+    run.status = RunStatus.PROCESSING.value
+    run.completed_at = None
+
+    db.commit()
+    db.refresh(new_source)
+
+    return SourceResponse(
+        id=new_source.id,
+        run_id=new_source.run_id,
+        title=new_source.title,
+        source_type=SourceType(new_source.source_type),
+        processing_status=SourceProcessingStatus(new_source.processing_status),
+        failure_reason=new_source.failure_reason,
+        content_length=new_source.content_length,
+        content_hash=new_source.content_hash,
+        content=new_source.raw_content,
+        page_count=new_source.page_count,
+        scanned_page_count=new_source.scanned_page_count,
+        extraction_metadata=new_source.extraction_metadata,
+        url=result.url,
+    )
+
+
+@router.post(
     "/{run_id}/extract",
     response_model=VerificationReportResponse,
     summary="Trigger factual claim extraction for a run",
@@ -458,6 +570,16 @@ def get_run_claims(
     return claims_list
 
 
+def _parse_source_url(meta_str: Optional[str]) -> Optional[str]:
+    if not meta_str:
+        return None
+    try:
+        parsed = json.loads(meta_str)
+        return parsed.get("url")
+    except Exception:
+        return None
+
+
 @router.get(
     "/{run_id}/sources/{source_id}",
     response_model=SourceResponse,
@@ -500,6 +622,7 @@ def get_source_detail(
         page_count=source.page_count,
         scanned_page_count=source.scanned_page_count,
         extraction_metadata=source.extraction_metadata,
+        url=_parse_source_url(source.extraction_metadata),
     )
 
 
@@ -546,6 +669,7 @@ def build_run_report(run: Run) -> VerificationReportResponse:
             page_count=s.page_count,
             scanned_page_count=s.scanned_page_count,
             extraction_metadata=s.extraction_metadata,
+            url=_parse_source_url(s.extraction_metadata),
         )
         for s in run.sources
     ]

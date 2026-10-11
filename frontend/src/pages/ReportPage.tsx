@@ -24,6 +24,13 @@ export const ReportPage: React.FC = () => {
   const [isUploadingPdf, setIsUploadingPdf] = useState<boolean>(false);
   const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
 
+  // Additional Website URL upload state
+  const [showUrlUpload, setShowUrlUpload] = useState<boolean>(false);
+  const [additionalUrl, setAdditionalUrl] = useState<string>('');
+  const [additionalUrlTitle, setAdditionalUrlTitle] = useState<string>('');
+  const [isAttachingUrl, setIsAttachingUrl] = useState<boolean>(false);
+  const [urlAttachError, setUrlAttachError] = useState<string | null>(null);
+
   const toggleClaimExpand = (claimId: string) => {
     setExpandedClaims((prev) => ({
       ...prev,
@@ -82,6 +89,30 @@ export const ReportPage: React.FC = () => {
       const msg = err instanceof Error ? err.message : 'Failed to attach PDF source document.';
       setPdfUploadError(msg);
       setIsUploadingPdf(false);
+    }
+  };
+
+  const handleAttachAdditionalUrl = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!runId || !additionalUrl.trim()) return;
+
+    setIsAttachingUrl(true);
+    setUrlAttachError(null);
+
+    try {
+      await apiClient.attachUrlSource(
+        runId,
+        additionalUrl.trim(),
+        additionalUrlTitle.trim() || undefined
+      );
+      setAdditionalUrl('');
+      setAdditionalUrlTitle('');
+      setShowUrlUpload(false);
+      await runFullVerification(runId);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to attach website URL source.';
+      setUrlAttachError(msg);
+      setIsAttachingUrl(false);
     }
   };
 
@@ -191,7 +222,25 @@ export const ReportPage: React.FC = () => {
                 borderColor: 'var(--color-iron-border)',
                 background: 'transparent',
               }}
-              onClick={() => setShowPdfUpload(!showPdfUpload)}
+              onClick={() => {
+                setShowUrlUpload(!showUrlUpload);
+                setShowPdfUpload(false);
+              }}
+            >
+              + Attach URL
+            </button>
+            <button
+              type="button"
+              className="pill-button"
+              style={{
+                color: 'var(--color-cream-text)',
+                borderColor: 'var(--color-iron-border)',
+                background: 'transparent',
+              }}
+              onClick={() => {
+                setShowPdfUpload(!showPdfUpload);
+                setShowUrlUpload(false);
+              }}
             >
               + Attach PDF
             </button>
@@ -304,6 +353,72 @@ export const ReportPage: React.FC = () => {
                   className="pill-button"
                   style={{ color: 'var(--color-zinc-mute)', borderColor: 'var(--color-iron-border)', background: 'transparent' }}
                   onClick={() => setShowPdfUpload(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
+        {/* Additional Website URL Source Drawer */}
+        {showUrlUpload && (
+          <section className="specimen-card" style={{ marginBottom: 'var(--spacing-16)' }}>
+            <div className="card-header-bar">
+              <span className="card-label">ATTACH SUPPLEMENTAL WEBSITE URL</span>
+              <button
+                type="button"
+                onClick={() => setShowUrlUpload(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--color-zinc-mute)', cursor: 'pointer', fontSize: '13px' }}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {urlAttachError && (
+              <div className="specimen-alert specimen-alert-danger" style={{ marginBottom: '16px' }}>
+                <span>⚠</span>
+                <div>{urlAttachError}</div>
+              </div>
+            )}
+
+            <form onSubmit={handleAttachAdditionalUrl}>
+              <div style={{ marginBottom: '12px' }}>
+                <input
+                  type="url"
+                  required
+                  className="terminal-input-single"
+                  value={additionalUrl}
+                  onChange={(e) => setAdditionalUrl(e.target.value)}
+                  placeholder="https://en.wikipedia.org/wiki/... or https://example.com/article"
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  className="terminal-input-single"
+                  value={additionalUrlTitle}
+                  onChange={(e) => setAdditionalUrlTitle(e.target.value)}
+                  placeholder="Optional display label (e.g. Official Specifications Documentation)"
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="submit"
+                  className="pill-button pill-mint"
+                  disabled={isAttachingUrl || !additionalUrl.trim()}
+                >
+                  {isAttachingUrl ? 'Fetching & Extracting Text...' : 'Fetch & Re-Audit'}
+                </button>
+                <button
+                  type="button"
+                  className="pill-button"
+                  style={{ color: 'var(--color-zinc-mute)', borderColor: 'var(--color-iron-border)', background: 'transparent' }}
+                  onClick={() => setShowUrlUpload(false)}
                 >
                   Cancel
                 </button>
@@ -500,6 +615,23 @@ export const ReportPage: React.FC = () => {
                             {src.page_count ? ` • ${src.page_count} PAGES` : ''}
                             {src.content_hash ? ` • HASH: ${src.content_hash.slice(0, 12)}...` : ''}
                           </div>
+                          {src.url && (
+                            <div style={{ marginTop: '4px' }}>
+                              <a
+                                href={src.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  fontSize: '12px',
+                                  color: 'var(--color-mint-pulse)',
+                                  textDecoration: 'underline',
+                                  wordBreak: 'break-all',
+                                }}
+                              >
+                                🔗 {src.url}
+                              </a>
+                            </div>
+                          )}
                         </div>
 
                         {src.content && (

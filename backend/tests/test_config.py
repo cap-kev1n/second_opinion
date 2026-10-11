@@ -9,7 +9,7 @@ def test_default_settings():
     """Verify default development configuration settings."""
     cfg = Settings(gemini_api_key="test_key")
     assert cfg.app_name == "Second Opinion API"
-    assert cfg.gemini_model in ["gemini-flash-latest", "gemini-2.5-flash"]
+    assert cfg.gemini_model in ["gemini-flash-latest", "gemini-2.5-flash", "gemini-3.5-flash-lite"]
     assert cfg.max_pdf_size_mb == 10
     assert cfg.llm_timeout_seconds == 30
     assert cfg.frontend_origin == "http://localhost:5173"

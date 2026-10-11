@@ -27,6 +27,28 @@ export const InputPage: React.FC = () => {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [prefilledFromExtension, setPrefilledFromExtension] = useState<boolean>(false);
 
+  // Multiple Website URL Sources state
+  const [urlList, setUrlList] = useState<{ id: string; url: string; title: string }[]>([
+    { id: '1', url: '', title: '' },
+  ]);
+
+  const addUrlItem = () => {
+    setUrlList((prev) => [
+      ...prev,
+      { id: String(Date.now()), url: '', title: '' },
+    ]);
+  };
+
+  const removeUrlItem = (id: string) => {
+    setUrlList((prev) => (prev.length > 1 ? prev.filter((item) => item.id !== id) : prev));
+  };
+
+  const updateUrlItem = (id: string, field: 'url' | 'title', value: string) => {
+    setUrlList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
+
   // Automated Execution Pipeline states
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -90,6 +112,9 @@ export const InputPage: React.FC = () => {
     setSourceTitle('NASA / ESA JWST Mission Profile');
     setSourceType('text');
     setSourceContent(SAMPLE_REFERENCE);
+    setUrlList([
+      { id: '1', url: 'https://en.wikipedia.org/wiki/James_Webb_Space_Telescope', title: 'Wikipedia — JWST' },
+    ]);
     setValidationError(null);
     setErrorMessage(null);
     setPrefilledFromExtension(false);
@@ -100,6 +125,7 @@ export const InputPage: React.FC = () => {
     setSourceTitle('Primary Reference Documentation');
     setSourceContent('');
     setPdfFile(null);
+    setUrlList([{ id: '1', url: '', title: '' }]);
     setValidationError(null);
     setErrorMessage(null);
     setIsProcessing(false);
@@ -145,6 +171,12 @@ export const InputPage: React.FC = () => {
         setValidationError('PDF file size exceeds maximum limit of 10 MB.');
         return;
       }
+    } else if (sourceType === 'url') {
+      const validUrls = urlList.filter((u) => u.url.trim().length > 0);
+      if (validUrls.length === 0) {
+        setValidationError('Please enter at least one valid website URL.');
+        return;
+      }
     }
 
     setIsProcessing(true);
@@ -152,6 +184,8 @@ export const InputPage: React.FC = () => {
     setStepDetail(
       sourceType === 'ai_crosscheck'
         ? 'Compiling autonomous factual cross-check dossier and registering run...'
+        : sourceType === 'url'
+        ? `Fetching ${urlList.filter((u) => u.url.trim().length > 0).length} website source(s), extracting text, and computing SHA-256 fingerprints...`
         : 'Fingerprinting reference source and registering run...'
     );
 
@@ -171,6 +205,25 @@ export const InputPage: React.FC = () => {
               content: '',
             },
           ],
+        });
+        runId = response.run_id;
+      } else if (sourceType === 'url') {
+        const validUrls = urlList.filter((u) => u.url.trim().length > 0);
+        const urlSources = validUrls.map((item, idx) => {
+          let u = item.url.trim();
+          if (!u.startsWith('http://') && !u.startsWith('https://')) {
+            u = 'https://' + u;
+          }
+          return {
+            source_type: 'url' as SourceType,
+            url: u,
+            title: item.title.trim() || `Web Source #${idx + 1}`,
+          };
+        });
+
+        const response = await apiClient.createRun({
+          answer: trimmedAnswer,
+          sources: urlSources,
         });
         runId = response.run_id;
       } else {
@@ -376,16 +429,18 @@ export const InputPage: React.FC = () => {
                 <span className="card-metadata">
                   {sourceType === 'ai_crosscheck'
                     ? 'AUTONOMOUS'
+                    : sourceType === 'url'
+                    ? `${urlList.filter((u) => u.url.trim()).length} URL(S)`
                     : sourceType === 'pdf'
                     ? 'PDF DOCUMENT'
                     : 'PASTED TEXT'}
                 </span>
               </div>
               <p className="prose-text" style={{ fontSize: '13px', marginBottom: 'var(--spacing-16)' }}>
-                Select autonomous AI cross-check (no upload needed), paste reference text, or upload a PDF document.
+                Select autonomous AI cross-check, add website URLs as sources, paste reference text, or upload a PDF document.
               </p>
 
-              {/* 3-Way Source Mode Switcher */}
+              {/* 4-Way Source Mode Switcher */}
               <div className="source-tab-tray">
                 <button
                   type="button"
@@ -394,6 +449,14 @@ export const InputPage: React.FC = () => {
                   disabled={isProcessing}
                 >
                   ✦ AI Cross-Check
+                </button>
+                <button
+                  type="button"
+                  className={`source-tab-btn ${sourceType === 'url' ? 'active' : ''}`}
+                  onClick={() => setSourceType('url')}
+                  disabled={isProcessing}
+                >
+                  Website URLs
                 </button>
                 <button
                   type="button"
@@ -443,7 +506,100 @@ export const InputPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Mode 2: Pasted Text */}
+                {/* Mode 2: Website URLs (Can add multiple sources) */}
+                {sourceType === 'url' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ marginBottom: 'var(--spacing-12)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--color-zinc-mute)' }}>
+                          WEB PAGE SOURCES ({urlList.length} CONFIGURED):
+                        </span>
+                        <button
+                          type="button"
+                          className="minimal-claim-expand-btn"
+                          onClick={addUrlItem}
+                          disabled={isProcessing}
+                          title="Add another website URL as source"
+                        >
+                          + Add Another URL
+                        </button>
+                      </div>
+                      <p style={{ fontSize: '12px', color: 'var(--color-zinc-mute)', margin: '0 0 10px', lineHeight: 1.4 }}>
+                        Enter article or documentation URLs. The auditor fetches live HTML, parses article text, and fingerprints each reference source.
+                      </p>
+                    </div>
+
+                    <div className="url-source-list">
+                      {urlList.map((item, idx) => (
+                        <div key={item.id} className="url-source-item">
+                          <div className="url-source-item-header">
+                            <span className="url-item-index">
+                              URL SOURCE #{idx + 1}
+                            </span>
+                            {urlList.length > 1 && (
+                              <button
+                                type="button"
+                                className="url-remove-btn"
+                                onClick={() => removeUrlItem(item.id)}
+                                disabled={isProcessing}
+                                title="Remove this URL"
+                              >
+                                ✕ Remove
+                              </button>
+                            )}
+                          </div>
+
+                          <div style={{ marginBottom: '8px' }}>
+                            <input
+                              type="url"
+                              className="terminal-input-single"
+                              disabled={isProcessing}
+                              value={item.url}
+                              onChange={(e) => updateUrlItem(item.id, 'url', e.target.value)}
+                              placeholder="https://en.wikipedia.org/wiki/... or https://example.com/article"
+                              style={{ width: '100%' }}
+                            />
+                          </div>
+
+                          <div>
+                            <input
+                              type="text"
+                              className="terminal-input-single"
+                              disabled={isProcessing}
+                              value={item.title}
+                              onChange={(e) => updateUrlItem(item.id, 'title', e.target.value)}
+                              placeholder="Optional label (e.g. Official Documentation)"
+                              style={{ width: '100%', fontSize: '12.5px', padding: '6px 10px' }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ marginTop: 'var(--spacing-12)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="pill-button"
+                        style={{
+                          fontSize: '12px',
+                          padding: '6px 14px',
+                          borderColor: 'var(--color-steel-border)',
+                          color: 'var(--color-cream-text)',
+                          background: 'var(--color-carbon-surface)',
+                        }}
+                        onClick={addUrlItem}
+                        disabled={isProcessing}
+                      >
+                        + Add URL Source
+                      </button>
+                      <span style={{ fontSize: '11px', fontFamily: 'var(--font-geist-mono)', color: 'var(--color-zinc-mute)' }}>
+                        {urlList.filter((u) => u.url.trim()).length} of {urlList.length} ready
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Mode 3: Pasted Text */}
                 {sourceType === 'text' && (
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <div style={{ marginBottom: 'var(--spacing-12)' }}>

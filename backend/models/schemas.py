@@ -89,10 +89,10 @@ class QuoteMatchStatus(str, Enum):
 
 class SourceCreateRequest(BaseModel):
     """Payload to create or submit a source with a run."""
-    title: str = Field(..., min_length=1, max_length=255, description="Source title or filename")
+    title: Optional[str] = Field(default="", max_length=255, description="Source title or filename")
     source_type: SourceType = Field(default=SourceType.TEXT, description="Type of source")
     content: Optional[str] = Field(None, description="Raw text content for text sources")
-    url: Optional[str] = Field(None, description="Source URL (reserved for future URL source type)")
+    url: Optional[str] = Field(None, description="Source URL for website sources")
 
     model_config = ConfigDict(extra="forbid")
 
@@ -111,6 +111,7 @@ class SourceResponse(BaseModel):
     page_count: Optional[int] = Field(None, description="Total number of pages for PDF documents")
     scanned_page_count: int = Field(0, description="Count of pages with little or no extractable text requiring OCR")
     extraction_metadata: Optional[str] = Field(None, description="JSON breakdown of per-page extraction records")
+    url: Optional[str] = Field(None, description="Website URL if source was loaded from web")
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -1084,3 +1084,57 @@ p.prose-text, .prose-block {
   margin-bottom: 6px;
 }
 
+/* Multiple URL Source Inputs */
+.url-source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  flex: 1;
+  overflow-y: auto;
+  max-height: 440px;
+  padding-right: 4px;
+}
+
+.url-source-item {
+  background-color: var(--color-void-canvas);
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-cards);
+  padding: 14px 16px;
+  transition: border-color 0.2s ease;
+}
+
+.url-source-item:focus-within {
+  border-color: var(--color-steel-border);
+}
+
+.url-source-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.url-item-index {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-zinc-mute);
+  text-transform: uppercase;
+}
+
+.url-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-zinc-mute);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.url-remove-btn:hover {
+  color: var(--color-ember-orange);
+  background-color: var(--color-carbon-surface);
+}
+
+

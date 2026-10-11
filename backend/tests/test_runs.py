@@ -124,21 +124,21 @@ def test_reject_unsupported_pdf_source(client):
     assert "PDF sources must be uploaded via the dedicated multipart upload endpoints" in response.json()["detail"]
 
 
-def test_reject_unsupported_url_source(client):
-    """Verify URL sources are rejected with clear error in Phase 1."""
+def test_reject_ssrf_url_source(client):
+    """Verify private/loopback URL sources are rejected by SSRF guardrails."""
     payload = {
         "answer": "Valid answer text to verify.",
         "sources": [
             {
-                "title": "Online Doc",
+                "title": "Local Doc",
                 "source_type": "url",
-                "url": "https://example.com/doc",
+                "url": "http://127.0.0.1:8000/secret",
             }
         ],
     }
     response = client.post("/api/runs", json=payload)
     assert response.status_code == 400
-    assert "Web URL sources are not supported in Phase 1" in response.json()["detail"]
+    assert "Access to private or local network IP addresses is forbidden" in response.json()["detail"]
 
 
 def test_reject_empty_source_content(client):
@@ -228,7 +228,7 @@ def test_get_run_report_honesty_and_empty_claims(client):
     assert data["summary"]["supported"] == 0
     assert data["summary"]["contradicted"] == 0
     assert data["summary"]["insufficiently_supported"] == 0
-    assert "awaiting implementation" in data["summary"]["coverage_note"]
+    assert "No claims extracted yet" in data["summary"]["coverage_note"]
 
 
 def test_get_run_report_404(client):

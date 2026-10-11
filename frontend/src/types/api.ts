@@ -57,7 +57,7 @@ export type QuoteMatchStatus =
   | 'not_checkable';
 
 export interface SourceCreateRequest {
-  title: string;
+  title?: string;
   source_type: SourceType;
   content?: string;
   url?: string;
@@ -76,6 +76,7 @@ export interface SourceResponse {
   page_count?: number | null;
   scanned_page_count?: number;
   extraction_metadata?: string | null;
+  url?: string | null;
 }
 
 export interface EvidenceResponse {
