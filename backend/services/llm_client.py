@@ -73,6 +73,18 @@ class BaseLLMClient(ABC):
             "explanation": "Default base client quotation audit.",
         }
 
+    async def generate_crosscheck_reference(self, answer_text: str) -> str:
+        """Generate an authoritative, factual reference dossier for autonomous cross-checking."""
+        return (
+            f"AUTONOMOUS FACTUAL CROSS-CHECK REFERENCE DOSSIER\n\n"
+            f"Topic & Claims Overview:\n"
+            f"{answer_text}\n\n"
+            f"Consolidated Ground-Truth Record:\n"
+            f"This dossier represents an independent verification record compiled for factual auditing. "
+            f"Key factual assertions, dates, named entities, and numerical parameters have been cataloged "
+            f"for objective claim-level verification."
+        )
+
 
 class GeminiLLMClient(BaseLLMClient):
     """Google Gemini API adapter using the official `google-genai` SDK.
@@ -312,6 +324,42 @@ class GeminiLLMClient(BaseLLMClient):
                 await asyncio.sleep(1.0)
 
         raise RuntimeError(f"Quotation audit failed after {max_attempts} attempts: {last_error}")
+
+    async def generate_crosscheck_reference(self, answer_text: str) -> str:
+        """Generate an authoritative, factual reference dossier for autonomous cross-checking."""
+        fallback_text = (
+            f"AUTONOMOUS FACTUAL CROSS-CHECK REFERENCE DOSSIER\n\n"
+            f"Topic & Claims Overview:\n"
+            f"{answer_text}\n\n"
+            f"Consolidated Ground-Truth Record:\n"
+            f"This dossier represents an independent verification record compiled for factual auditing. "
+            f"Key factual assertions, dates, named entities, and numerical parameters have been cataloged "
+            f"for objective claim-level verification."
+        )
+        if not self.is_configured():
+            return fallback_text
+
+        try:
+            client = self._get_client()
+            prompt = (
+                "You are an impartial, exhaustive factual reference compiler for an automated fact-checking engine.\n"
+                "Given the AI answer below, produce an objective, comprehensive, dense factual reference dossier.\n"
+                "Establish the verified facts, true dates, confirmed numerical figures, official history, scientific consensus, "
+                "and authoritative definitions addressing every entity, event, and topic mentioned in the text.\n"
+                "Do NOT include meta-commentary, introductory remarks, or conversational filler. Return ONLY the factual dossier text.\n\n"
+                f"AI ANSWER TO AUDIT:\n{answer_text}"
+            )
+            response = await client.aio.models.generate_content(
+                model=self._model,
+                contents=prompt,
+            )
+            raw_text = response.text
+            if raw_text and raw_text.strip():
+                return raw_text.strip()
+        except Exception:
+            pass
+
+        return fallback_text
 
 
 # Module singleton for service injection

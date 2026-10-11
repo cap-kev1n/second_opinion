@@ -41,7 +41,8 @@ export type EvidenceRelationship =
 export type SourceType =
   | 'text'
   | 'pdf'
-  | 'url';
+  | 'url'
+  | 'ai_crosscheck';
 
 export type QuoteMatchStatus =
   | 'exact_match'

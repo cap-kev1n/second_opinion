@@ -25,6 +25,7 @@ export const InputPage: React.FC = () => {
   const [sourceType, setSourceType] = useState<SourceType>('text');
   const [sourceContent, setSourceContent] = useState<string>('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [prefilledFromExtension, setPrefilledFromExtension] = useState<boolean>(false);
 
   // Automated Execution Pipeline states
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -54,6 +55,31 @@ export const InputPage: React.FC = () => {
         }
       });
 
+    // Check for pre-filled text from Chrome Extension via URL hash or query params
+    try {
+      let candidateText: string | null = null;
+      if (window.location.hash.startsWith('#audit=')) {
+        candidateText = decodeURIComponent(window.location.hash.substring(7));
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const auditQuery = urlParams.get('audit');
+        if (auditQuery) {
+          candidateText = auditQuery;
+        }
+      }
+
+      if (candidateText && candidateText.trim().length > 0) {
+        setAnswer(candidateText.trim());
+        setSourceType('ai_crosscheck');
+        setSourceTitle('Autonomous AI Cross-Check Dossier');
+        setPrefilledFromExtension(true);
+        // Clear hash so page reload doesn't trigger unexpected state
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
+
     return () => {
       isMounted = false;
     };
@@ -66,6 +92,7 @@ export const InputPage: React.FC = () => {
     setSourceContent(SAMPLE_REFERENCE);
     setValidationError(null);
     setErrorMessage(null);
+    setPrefilledFromExtension(false);
   };
 
   const handleReset = () => {
@@ -77,11 +104,12 @@ export const InputPage: React.FC = () => {
     setErrorMessage(null);
     setIsProcessing(false);
     setCurrentStep(0);
+    setPrefilledFromExtension(false);
   };
 
   /**
    * Automated verification pipeline execution:
-   * 1. Register run & ingest sources
+   * 1. Register run & ingest sources (or generate autonomous crosscheck)
    * 2. Extract atomic claims via Gemini
    * 3. Retrieve BM25 candidate evidence passages
    * 4. Categorize claims (Supported, Contradicted, etc.) and audit quotes
@@ -101,7 +129,7 @@ export const InputPage: React.FC = () => {
     if (sourceType === 'text') {
       const trimmedContent = sourceContent.trim();
       if (!trimmedContent) {
-        setValidationError('Please paste your reference source text.');
+        setValidationError('Please paste your reference source text, or switch to AI Cross-Check.');
         return;
       }
     } else if (sourceType === 'pdf') {
@@ -121,13 +149,29 @@ export const InputPage: React.FC = () => {
 
     setIsProcessing(true);
     setCurrentStep(1);
-    setStepDetail('Fingerprinting reference source and registering run...');
+    setStepDetail(
+      sourceType === 'ai_crosscheck'
+        ? 'Compiling autonomous factual cross-check dossier and registering run...'
+        : 'Fingerprinting reference source and registering run...'
+    );
 
     try {
       // Step 1: Create Run & Ingest Source
       let runId = '';
       if (sourceType === 'pdf' && pdfFile) {
         const response = await apiClient.createRunWithPdf(trimmedAnswer, pdfFile, trimmedTitle);
+        runId = response.run_id;
+      } else if (sourceType === 'ai_crosscheck') {
+        const response = await apiClient.createRun({
+          answer: trimmedAnswer,
+          sources: [
+            {
+              title: trimmedTitle || 'Autonomous AI Cross-Check Dossier',
+              source_type: 'ai_crosscheck',
+              content: '',
+            },
+          ],
+        });
         runId = response.run_id;
       } else {
         const response = await apiClient.createRun({
@@ -172,7 +216,6 @@ export const InputPage: React.FC = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // If Enter is pressed with Ctrl/Cmd or outside multiline input
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       executeVerification();
@@ -224,25 +267,24 @@ export const InputPage: React.FC = () => {
               disabled={isProcessing}
               title="Audit AI Answer strictly against sources"
             >
-              {isProcessing ? 'Verifying...' : '↵ Audit [Enter]'}
+              {isProcessing ? 'Verifying...' : '↵ Audit [Ctrl+Enter]'}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Container */}
-      <main className="page-column" onKeyDown={handleKeyDown}>
-        {/* Full-Viewport Midjourney Hero with Generative ASCII Sphere */}
-        <section className="hero-visual-section">
+      {/* Main Container - Desktop-First Layout */}
+      <main className="page-column desktop-wide" onKeyDown={handleKeyDown}>
+        {/* Streamlined Hero Header */}
+        <section className="hero-visual-section hero-compact">
           <AsciiSphere active={isProcessing} />
           <div className="hero-content">
             <h1 className="hero-title">Second Opinion</h1>
             <p className="hero-subtitle prose-text">
-              Deep-ocean factual verification terminal. Evaluates AI answers strictly
-              against user-supplied reference sources. Pretrained model knowledge is excluded.
+              Deep-ocean factual verification terminal. Evaluates AI answers strictly against user-supplied reference sources or autonomous AI cross-examination.
             </p>
             <div className="hero-instruction-tag">
-              <span>Minimal input: Paste AI reply + Reference source ➔ Press <kbd>Enter ↵</kbd></span>
+              <span>Paste AI reply on the left ➔ Select reference mode on the right ➔ Press <kbd>Ctrl+Enter ↵</kbd></span>
             </div>
           </div>
         </section>
@@ -324,153 +366,234 @@ export const InputPage: React.FC = () => {
           </section>
         )}
 
-        {/* Main Verification Input Form */}
+        {/* Main Desktop-First Side-by-Side Form */}
         <form ref={formRef} onSubmit={handleSubmit}>
-          {/* Section 1: AI-Generated Answer */}
-          <section className="specimen-card" style={{ marginBottom: 'var(--spacing-32)' }}>
-            <div className="card-header-bar">
-              <label htmlFor="ai-answer-textarea" className="card-label">
-                <span className="heading-glyph">⚙</span> 1. AI Reply to Audit
-              </label>
-              <span className="card-metadata">{answer.length} chars</span>
-            </div>
-            <p className="prose-text" style={{ fontSize: '14px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
-              Paste the text from ChatGPT, Claude, Gemini, or any LLM model that requires factual auditing.
-            </p>
-            <textarea
-              id="ai-answer-textarea"
-              className="terminal-textarea"
-              rows={6}
-              disabled={isProcessing}
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="e.g. The James Webb Space Telescope was launched on December 25, 2021... (Press Enter or Ctrl+Enter to audit)"
-            />
-          </section>
-
-          {/* Section 2: User Reference Source */}
-          <section className="specimen-card" style={{ marginBottom: 'var(--spacing-32)' }}>
-            <div className="card-header-bar">
-              <label className="card-label">
-                <span className="heading-glyph">ℹ</span> 2. Ground-Truth Reference Source
-              </label>
-              <span className="card-metadata">Source-Scoped Only</span>
-            </div>
-            <p className="prose-text" style={{ fontSize: '14px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
-              Provide the reference documentation, manual, or report text. Factual claims are evaluated strictly against this source.
-            </p>
-
-            {/* Source Mode Switcher */}
-            <div className="source-tab-tray">
+          {/* Extension Notification Banner */}
+          {prefilledFromExtension && (
+            <div className="extension-prefill-banner">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="prefill-tag">CHROME EXTENSION</span>
+                <span>AI reply loaded from ChatGPT. Ready to audit with autonomous AI cross-check!</span>
+              </div>
               <button
                 type="button"
-                className={`source-tab-btn ${sourceType === 'text' ? 'active' : ''}`}
-                onClick={() => setSourceType('text')}
-                disabled={isProcessing}
+                className="pill-button"
+                style={{ padding: '4px 12px', fontSize: '12px' }}
+                onClick={() => setPrefilledFromExtension(false)}
               >
-                Pasted Reference Text
-              </button>
-              <button
-                type="button"
-                className={`source-tab-btn ${sourceType === 'pdf' ? 'active' : ''}`}
-                onClick={() => setSourceType('pdf')}
-                disabled={isProcessing}
-              >
-                Upload PDF Document
+                Dismiss
               </button>
             </div>
+          )}
 
-            {/* Source Title Input */}
-            <div style={{ marginBottom: 'var(--spacing-16)' }}>
-              <label htmlFor="source-title-input" style={{ fontSize: '13px', color: 'var(--color-mist)', display: 'block', marginBottom: '6px' }}>
-                Source Identifier / Title (Optional):
-              </label>
-              <input
-                id="source-title-input"
-                type="text"
-                className="terminal-input-single"
-                disabled={isProcessing}
-                value={sourceTitle}
-                onChange={(e) => setSourceTitle(e.target.value)}
-                placeholder="e.g. Official Mission Specifications"
-              />
-            </div>
-
-            {/* Text Source Input */}
-            {sourceType === 'text' && (
-              <div>
+          <div className="workspace-split-grid">
+            {/* Left Panel: AI-Generated Answer */}
+            <div className="workspace-card">
+              <div className="card-header-bar">
+                <label htmlFor="ai-answer-textarea" className="card-label">
+                  <span className="heading-glyph">⚙</span> 1. AI Reply to Audit
+                </label>
+                <span className="card-metadata">{answer.length} chars</span>
+              </div>
+              <p className="prose-text" style={{ fontSize: '13.5px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
+                Paste the text from ChatGPT, Claude, Gemini, or any LLM model that requires factual auditing.
+              </p>
+              <div className="workspace-card-body">
                 <textarea
-                  id="source-content-textarea"
-                  className="terminal-textarea"
-                  rows={8}
+                  id="ai-answer-textarea"
+                  className="workspace-textarea"
                   disabled={isProcessing}
-                  value={sourceContent}
-                  onChange={(e) => setSourceContent(e.target.value)}
-                  placeholder="Paste reliable reference documentation, article text, or ground-truth excerpt here..."
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="Paste AI reply here... (e.g. The James Webb Space Telescope was launched in 2018... Press Ctrl+Enter to audit)"
                 />
               </div>
-            )}
+            </div>
 
-            {/* PDF Upload Zone */}
-            {sourceType === 'pdf' && (
-              <div>
-                <label htmlFor="source-pdf-file-input">
-                  <div className="dropzone-container">
-                    <input
-                      id="source-pdf-file-input"
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      disabled={isProcessing}
-                      style={{ display: 'none' }}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setPdfFile(file);
-                        if (file && (!sourceTitle || sourceTitle === 'Primary Reference Documentation')) {
-                          setSourceTitle(file.name);
-                        }
-                      }}
-                    />
-                    <div style={{ color: 'var(--color-ghost-white)', fontSize: '15px', marginBottom: '6px' }}>
-                      {pdfFile ? `Selected: ${pdfFile.name}` : 'Click to select PDF document'}
+            {/* Right Panel: Ground-Truth Reference Source */}
+            <div className="workspace-card">
+              <div className="card-header-bar">
+                <label className="card-label">
+                  <span className="heading-glyph">ℹ</span> 2. Reference Source & Verification Mode
+                </label>
+                <span className="card-metadata">
+                  {sourceType === 'ai_crosscheck'
+                    ? 'Autonomous AI'
+                    : sourceType === 'pdf'
+                    ? 'PDF Document'
+                    : 'Pasted Text'}
+                </span>
+              </div>
+              <p className="prose-text" style={{ fontSize: '13.5px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
+                Supply ground-truth documentation, upload a PDF, or run an autonomous AI cross-check without uploading sources.
+              </p>
+
+              {/* 3-Way Source Mode Switcher */}
+              <div className="source-tab-tray" style={{ marginBottom: 'var(--spacing-16)' }}>
+                <button
+                  type="button"
+                  className={`source-tab-btn ${sourceType === 'text' ? 'active' : ''}`}
+                  onClick={() => setSourceType('text')}
+                  disabled={isProcessing}
+                >
+                  📄 Pasted Text
+                </button>
+                <button
+                  type="button"
+                  className={`source-tab-btn ${sourceType === 'pdf' ? 'active' : ''}`}
+                  onClick={() => setSourceType('pdf')}
+                  disabled={isProcessing}
+                >
+                  📑 Upload PDF
+                </button>
+                <button
+                  type="button"
+                  className={`source-tab-btn crosscheck-btn ${sourceType === 'ai_crosscheck' ? 'active' : ''}`}
+                  onClick={() => setSourceType('ai_crosscheck')}
+                  disabled={isProcessing}
+                >
+                  ✦ AI Cross-Check
+                </button>
+              </div>
+
+              <div className="workspace-card-body">
+                {/* Mode 1: AI Autonomous Cross-Check */}
+                {sourceType === 'ai_crosscheck' && (
+                  <div className="ai-crosscheck-panel">
+                    <div className="crosscheck-badge">
+                      <span>◈</span> AUTONOMOUS CROSS-CHECK
                     </div>
-                    <div style={{ fontSize: '13px', color: 'var(--color-mist)' }}>
-                      {pdfFile
-                        ? `${(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • Text pages will be parsed automatically`
-                        : 'Supports PDF up to 10 MB, up to 100 pages'}
+                    <h3 style={{ color: 'var(--color-ghost-white)', fontSize: '18px', marginBottom: '8px' }}>
+                      Zero-Upload Fact Checking
+                    </h3>
+                    <p style={{ fontSize: '13.5px', color: 'var(--color-mist)', maxWidth: '420px', lineHeight: 1.55 }}>
+                      The verification engine will synthesize an authoritative ground-truth factual dossier and audit each claim against verified consensus.
+                    </p>
+                    <div className="crosscheck-feature-list">
+                      <div className="crosscheck-feature-item">
+                        <span className="glyph">✓</span>
+                        <span>No manual PDF or source text documentation required</span>
+                      </div>
+                      <div className="crosscheck-feature-item">
+                        <span className="glyph">✓</span>
+                        <span>Decomposes the AI response into atomic verifiable claims</span>
+                      </div>
+                      <div className="crosscheck-feature-item">
+                        <span className="glyph">✓</span>
+                        <span>Cross-checks entities, dates, numbers, and historical facts</span>
+                      </div>
                     </div>
                   </div>
-                </label>
+                )}
+
+                {/* Mode 2: Pasted Text */}
+                {sourceType === 'text' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ marginBottom: 'var(--spacing-12)' }}>
+                      <label htmlFor="source-title-input" style={{ fontSize: '12.5px', color: 'var(--color-mist)', display: 'block', marginBottom: '4px' }}>
+                        Source Identifier / Title (Optional):
+                      </label>
+                      <input
+                        id="source-title-input"
+                        type="text"
+                        className="terminal-input-single"
+                        disabled={isProcessing}
+                        value={sourceTitle}
+                        onChange={(e) => setSourceTitle(e.target.value)}
+                        placeholder="e.g. Official Mission Specifications"
+                      />
+                    </div>
+                    <textarea
+                      id="source-content-textarea"
+                      className="workspace-textarea"
+                      disabled={isProcessing}
+                      value={sourceContent}
+                      onChange={(e) => setSourceContent(e.target.value)}
+                      placeholder="Paste reliable reference documentation, article text, or ground-truth excerpt here..."
+                    />
+                  </div>
+                )}
+
+                {/* Mode 3: PDF Document */}
+                {sourceType === 'pdf' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ marginBottom: 'var(--spacing-12)' }}>
+                      <label htmlFor="source-title-input-pdf" style={{ fontSize: '12.5px', color: 'var(--color-mist)', display: 'block', marginBottom: '4px' }}>
+                        Document Title (Optional):
+                      </label>
+                      <input
+                        id="source-title-input-pdf"
+                        type="text"
+                        className="terminal-input-single"
+                        disabled={isProcessing}
+                        value={sourceTitle}
+                        onChange={(e) => setSourceTitle(e.target.value)}
+                        placeholder="e.g. Scientific Research Paper.pdf"
+                      />
+                    </div>
+                    <label htmlFor="source-pdf-file-input" style={{ flex: 1, display: 'flex', cursor: 'pointer' }}>
+                      <div className="dropzone-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <input
+                          id="source-pdf-file-input"
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          disabled={isProcessing}
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setPdfFile(file);
+                            if (file && (!sourceTitle || sourceTitle === 'Primary Reference Documentation')) {
+                              setSourceTitle(file.name);
+                            }
+                          }}
+                        />
+                        <div style={{ color: 'var(--color-ghost-white)', fontSize: '15px', marginBottom: '6px' }}>
+                          {pdfFile ? `Selected: ${pdfFile.name}` : 'Click to select PDF document'}
+                        </div>
+                        <div style={{ fontSize: '13px', color: 'var(--color-mist)' }}>
+                          {pdfFile
+                            ? `${(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • Text pages will be parsed automatically`
+                            : 'Supports PDF up to 10 MB, up to 100 pages'}
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                )}
               </div>
-            )}
-          </section>
+            </div>
+          </div>
 
           {/* Action Dispatch Bar */}
-          <div className="action-dispatch-bar">
+          <div className="action-dispatch-bar" style={{ marginTop: 'var(--spacing-16)' }}>
             <div className="dispatch-hint">
-              <span>Audit shortcut:</span>
-              <kbd>Enter ↵</kbd>
-              <span>or</span>
+              <span>Shortcut:</span>
               <kbd>Ctrl+Enter</kbd>
+              <span>or</span>
+              <kbd>Enter ↵</kbd>
             </div>
 
             <button
               type="submit"
               className="pill-button pill-green"
               disabled={isProcessing}
-              style={{ padding: '10px 28px', fontSize: '15px' }}
+              style={{ padding: '12px 32px', fontSize: '15.5px' }}
             >
-              {isProcessing ? 'Auditing Factual Claims...' : '↵ Audit Answer & Categorize Claims'}
+              {isProcessing
+                ? 'Auditing Factual Claims...'
+                : sourceType === 'ai_crosscheck'
+                ? '↵ Cross-Check & Audit with AI'
+                : '↵ Audit Answer & Categorize Claims'}
             </button>
           </div>
         </form>
 
         {/* Categorized Verdict Taxonomy Specimen Tray */}
-        <section className="specimen-card">
+        <section className="specimen-card" style={{ marginTop: 'var(--spacing-16)' }}>
           <div className="section-heading" style={{ fontSize: '20px', marginBottom: 'var(--spacing-16)' }}>
             <span className="heading-glyph">✦</span> Categorization Taxonomy
           </div>
           <p className="prose-text" style={{ fontSize: '14px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-24)' }}>
-            Claims are audited strictly against supplied sources without relying on pretrained web training data:
+            Claims are audited strictly against verified evidence without hallucinations or presumptions:
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--spacing-16)' }}>
@@ -479,7 +602,7 @@ export const InputPage: React.FC = () => {
                 Supported / Correct
               </div>
               <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
-                Directly substantiated by verified text passages in the supplied reference documents.
+                Directly substantiated by verified text passages in reference documents or authoritative consensus.
               </p>
             </div>
 
@@ -488,7 +611,7 @@ export const InputPage: React.FC = () => {
                 Contradicted
               </div>
               <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
-                Directly refuted or conflicted by factual statements in the supplied reference documents.
+                Directly refuted or conflicted by verified factual statements.
               </p>
             </div>
 
@@ -497,7 +620,7 @@ export const InputPage: React.FC = () => {
                 Insufficient Evidence
               </div>
               <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
-                Reference documents lack relevant facts to confirm or deny. Never presumed false.
+                Reference records lack conclusive facts to confirm or deny. Never presumed false.
               </p>
             </div>
 

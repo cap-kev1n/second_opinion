@@ -854,3 +854,182 @@ p.prose-text, .prose-block {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-steel-navy);
 }
+
+/* ==============================================================================
+   Desktop-First Workspace Layout & Side-by-Side Split Grid
+   ============================================================================== */
+
+.page-column.desktop-wide {
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-32) var(--spacing-32) var(--spacing-64);
+  gap: var(--spacing-32);
+}
+
+.hero-compact {
+  padding: var(--spacing-32) var(--spacing-24);
+  margin-bottom: var(--spacing-16);
+}
+
+.hero-compact .hero-title {
+  font-size: 28px;
+  margin-bottom: var(--spacing-8);
+}
+
+.hero-compact .hero-subtitle {
+  font-size: 15px;
+  margin-bottom: var(--spacing-16);
+}
+
+/* 2-Column Desktop-First Split Grid */
+.workspace-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-24);
+  align-items: stretch;
+  margin-bottom: var(--spacing-24);
+}
+
+@media (max-width: 980px) {
+  .workspace-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.workspace-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-steel-navy);
+  border: 1px solid rgba(229, 231, 235, 0.08);
+  border-radius: var(--radius-cards);
+  padding: var(--spacing-24);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workspace-card:focus-within {
+  border-color: rgba(99, 179, 237, 0.35);
+  box-shadow: 0 0 16px rgba(99, 179, 237, 0.08);
+}
+
+.workspace-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 380px;
+  background-color: var(--color-cosmic-void);
+  border: 1px solid rgba(229, 231, 235, 0.12);
+  border-radius: var(--radius-inputs);
+  padding: var(--spacing-16);
+  color: var(--color-mist);
+  font-family: var(--font-jetbrains-mono);
+  font-size: 14.5px;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.workspace-textarea:focus {
+  outline: none;
+  border-color: var(--color-portal-blue);
+  box-shadow: var(--glow-blue);
+}
+
+/* Source Mode Switcher with 3 options */
+.source-tab-btn.crosscheck-btn {
+  border: 1px solid rgba(0, 188, 125, 0.35);
+  color: var(--color-specimen-green);
+  position: relative;
+}
+
+.source-tab-btn.crosscheck-btn.active {
+  background-color: rgba(0, 79, 59, 0.6);
+  border-color: var(--color-specimen-green);
+  box-shadow: var(--glow-green);
+}
+
+/* AI Autonomous Cross-Check Specimen Panel */
+.ai-crosscheck-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(6, 20, 52, 0.75) 0%, rgba(6, 5, 29, 0.95) 100%);
+  border: 1px solid rgba(0, 188, 125, 0.25);
+  border-radius: var(--radius-inputs);
+  padding: var(--spacing-32) var(--spacing-24);
+  box-shadow: inset 0 0 24px rgba(0, 188, 125, 0.06);
+  min-height: 380px;
+}
+
+.crosscheck-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(0, 79, 59, 0.5);
+  border: 1px solid var(--color-specimen-green);
+  color: var(--color-specimen-green);
+  padding: 6px 14px;
+  border-radius: var(--radius-buttons);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-16);
+  box-shadow: var(--glow-green);
+}
+
+.crosscheck-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  max-width: 440px;
+  margin: var(--spacing-24) auto 0;
+  font-size: 13.5px;
+  color: var(--color-mist);
+}
+
+.crosscheck-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.crosscheck-feature-item .glyph {
+  color: var(--color-specimen-green);
+  font-weight: bold;
+}
+
+/* Chrome Extension Prefill Alert */
+.extension-prefill-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(99, 179, 237, 0.12);
+  border: 1px solid rgba(99, 179, 237, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 10px 18px;
+  margin-bottom: var(--spacing-16);
+  font-size: 13.5px;
+  color: var(--color-ice-blue);
+}
+
+.prefill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(99, 179, 237, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 500;
+}

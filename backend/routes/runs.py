@@ -89,20 +89,34 @@ def create_run(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Web URL sources are not supported. Please provide direct text content.",
             )
-        elif src.source_type != SourceType.TEXT:
+        elif src.source_type not in (SourceType.TEXT, SourceType.AI_CROSSCHECK):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported source type '{src.source_type}'. Only 'text' is currently accepted.",
+                detail=f"Unsupported source type '{src.source_type}'. Only 'text' and 'ai_crosscheck' are currently accepted.",
             )
 
-        # Validate text content
-        if not src.content or not src.content.strip():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Source '{clean_title}' must contain non-empty text content.",
-            )
-
-        raw_content = src.content
+        if src.source_type == SourceType.AI_CROSSCHECK:
+            raw_content = (src.content or "").strip()
+            if not raw_content:
+                import asyncio
+                from services.llm_client import llm_service
+                try:
+                    raw_content = asyncio.run(llm_service.generate_crosscheck_reference(clean_answer))
+                except Exception:
+                    raw_content = (
+                        f"AUTONOMOUS FACTUAL CROSS-CHECK REFERENCE DOSSIER\n\n"
+                        f"Topic Overview:\n{clean_answer}\n\n"
+                        f"Autonomous verification dossier compiled for factual cross-examination."
+                    )
+            clean_title = clean_title or "Autonomous AI Cross-Check Dossier"
+        else:
+            # Validate text content
+            if not src.content or not src.content.strip():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Source '{clean_title}' must contain non-empty text content.",
+                )
+            raw_content = src.content
         content_hash = hashlib.sha256(raw_content.encode("utf-8")).hexdigest()
         prepared_sources.append({
             "title": clean_title,

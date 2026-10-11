@@ -1,0 +1,52 @@
+/* Second Opinion Audit Button on ChatGPT */
+.so-audit-container {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.so-audit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 28, 54, 0.85);
+  color: #00bc7d;
+  border: 1px solid rgba(0, 188, 125, 0.4);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+.so-audit-btn:hover {
+  background: rgba(0, 79, 59, 0.9);
+  border-color: #00bc7d;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 188, 125, 0.35);
+  transform: translateY(-1px);
+}
+
+.so-audit-btn:active {
+  transform: translateY(0);
+}
+
+.so-audit-btn .so-glyph {
+  font-size: 11px;
+  color: #00bc7d;
+}
+
+.so-audit-btn:hover .so-glyph {
+  color: #ffffff;
+}
+
+.so-audit-btn.so-loading {
+  opacity: 0.75;
+  pointer-events: none;
+}

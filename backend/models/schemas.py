@@ -65,6 +65,7 @@ class SourceType(str, Enum):
     TEXT = "text"
     PDF = "pdf"
     URL = "url"  # Reserved for future implementation
+    AI_CROSSCHECK = "ai_crosscheck"  # Autonomous AI factual cross-check without manual source upload
 
 
 class QuoteMatchStatus(str, Enum):
