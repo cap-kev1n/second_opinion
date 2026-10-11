@@ -924,3 +924,163 @@ p.prose-text, .prose-block {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-steel-border);
 }
+
+/* ==============================================================================
+   Minimalist Report & Collapsible Elements
+   ============================================================================== */
+
+.minimal-collapse-card {
+  background-color: var(--color-carbon-surface);
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-cards);
+  margin-bottom: var(--spacing-16);
+  transition: border-color 0.2s ease;
+}
+
+.minimal-collapse-card[open] {
+  border-color: var(--color-steel-border);
+}
+
+.minimal-collapse-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-cream-text);
+  user-select: none;
+}
+
+.minimal-collapse-summary:hover {
+  background-color: var(--color-slab-elevated);
+}
+
+.minimal-collapse-content {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--color-iron-border);
+}
+
+/* Minimalist Claim Row */
+.minimal-claim-item {
+  background-color: var(--color-carbon-surface);
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-cards);
+  margin-bottom: var(--spacing-8);
+  transition: border-color 0.2s ease;
+}
+
+.minimal-claim-item:hover {
+  border-color: var(--color-steel-border);
+}
+
+.minimal-claim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.minimal-claim-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  flex: 1;
+  min-width: 0;
+}
+
+.minimal-claim-text {
+  font-family: var(--font-seasonsans);
+  font-size: 14.5px;
+  color: var(--color-cream-text);
+  line-height: 1.45;
+  flex: 1;
+}
+
+.minimal-claim-expand-btn {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-zinc-mute);
+  background: transparent;
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-chips);
+  padding: 4px 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.minimal-claim-item:hover .minimal-claim-expand-btn {
+  color: var(--color-cream-text);
+  border-color: var(--color-steel-border);
+}
+
+.minimal-claim-body {
+  padding: 16px 18px 20px;
+  border-top: 1px solid var(--color-iron-border);
+  background-color: var(--color-void-canvas);
+}
+
+/* Metrics Row */
+.metrics-specimen-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--spacing-12);
+  margin-bottom: var(--spacing-20);
+}
+
+.metric-specimen-cell {
+  background-color: var(--color-carbon-surface);
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-cards);
+  padding: 14px 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.metric-specimen-cell:hover {
+  border-color: var(--color-steel-border);
+}
+
+.metric-value {
+  font-family: var(--font-geist-mono);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-cream-text);
+  margin-bottom: 4px;
+}
+
+.metric-label {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-zinc-mute);
+}
+
+.evidence-passage-box {
+  background-color: var(--color-carbon-surface);
+  border: 1px solid var(--color-iron-border);
+  border-radius: var(--radius-cards);
+  padding: 14px 16px;
+  margin-top: 10px;
+}
+
+.evidence-source-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-zinc-mute);
+  margin-bottom: 6px;
+}
+

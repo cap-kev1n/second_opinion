@@ -323,64 +323,6 @@ export const InputPage: React.FC = () => {
           </div>
         )}
 
-        {/* Real-Time Telemetry Pipeline Display (Visible when running) */}
-        {isProcessing && (
-          <section className="telemetry-stream-card">
-            <div className="telemetry-header">
-              <span className="telemetry-terminal-title">
-                ⚙ PIPELINE TELEMETRY STREAM
-              </span>
-              <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
-                {stepDetail}
-              </span>
-            </div>
-
-            <div className="telemetry-step-list">
-              <div className="telemetry-step-item">
-                <div className={`step-indicator ${currentStep > 1 ? 'done' : currentStep === 1 ? 'active' : 'pending'}`}>
-                  {currentStep > 1 ? '✓' : '1'}
-                </div>
-                <div>
-                  <div className="step-text-title">Reference Ingestion & SHA-256 Fingerprinting</div>
-                  <div className="step-text-sub">Persisting immutable ground-truth document records</div>
-                </div>
-              </div>
-
-              <div className="telemetry-step-item">
-                <div className={`step-indicator ${currentStep > 2 ? 'done' : currentStep === 2 ? 'active' : 'pending'}`}>
-                  {currentStep > 2 ? '✓' : '2'}
-                </div>
-                <div>
-                  <div className="step-text-title">Atomic Factual Claim Extraction</div>
-                  <div className="step-text-sub">Decomposing AI answer into isolated verifiable statements</div>
-                </div>
-              </div>
-
-              <div className="telemetry-step-item">
-                <div className={`step-indicator ${currentStep > 3 ? 'done' : currentStep === 3 ? 'active' : 'pending'}`}>
-                  {currentStep > 3 ? '✓' : '3'}
-                </div>
-                <div>
-                  <div className="step-text-title">Lexical Passage Evidence Retrieval</div>
-                  <div className="step-text-sub">Scoring and extracting candidate citations via BM25 ranking</div>
-                </div>
-              </div>
-
-              <div className="telemetry-step-item">
-                <div className={`step-indicator ${currentStep > 4 ? 'done' : currentStep === 4 ? 'active' : 'pending'}`}>
-                  {currentStep > 4 ? '✓' : '4'}
-                </div>
-                <div>
-                  <div className="step-text-title">Grounded Assessment & Categorization</div>
-                  <div className="step-text-sub">
-                    Classifying claims into Supported, Contradicted, Insufficient, or Ambiguous
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Main Desktop-First Side-by-Side Form */}
         <form ref={formRef} onSubmit={handleSubmit}>
           {/* Extension Notification Banner */}
@@ -577,6 +519,64 @@ export const InputPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Real-Time Telemetry Pipeline Display (Positioned below the two columns) */}
+          {isProcessing && (
+            <section className="telemetry-stream-card" style={{ marginTop: 'var(--spacing-20)', marginBottom: 'var(--spacing-16)' }}>
+              <div className="telemetry-header">
+                <span className="telemetry-terminal-title">
+                  ⚙ PIPELINE TELEMETRY STREAM
+                </span>
+                <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
+                  {stepDetail}
+                </span>
+              </div>
+
+              <div className="telemetry-step-list">
+                <div className="telemetry-step-item">
+                  <div className={`step-indicator ${currentStep > 1 ? 'done' : currentStep === 1 ? 'active' : 'pending'}`}>
+                    {currentStep > 1 ? '✓' : '1'}
+                  </div>
+                  <div>
+                    <div className="step-text-title">Reference Ingestion & SHA-256 Fingerprinting</div>
+                    <div className="step-text-sub">Persisting immutable ground-truth document records</div>
+                  </div>
+                </div>
+
+                <div className="telemetry-step-item">
+                  <div className={`step-indicator ${currentStep > 2 ? 'done' : currentStep === 2 ? 'active' : 'pending'}`}>
+                    {currentStep > 2 ? '✓' : '2'}
+                  </div>
+                  <div>
+                    <div className="step-text-title">Atomic Factual Claim Extraction</div>
+                    <div className="step-text-sub">Decomposing AI answer into isolated verifiable statements</div>
+                  </div>
+                </div>
+
+                <div className="telemetry-step-item">
+                  <div className={`step-indicator ${currentStep > 3 ? 'done' : currentStep === 3 ? 'active' : 'pending'}`}>
+                    {currentStep > 3 ? '✓' : '3'}
+                  </div>
+                  <div>
+                    <div className="step-text-title">Lexical Passage Evidence Retrieval</div>
+                    <div className="step-text-sub">Scoring and extracting candidate citations via BM25 ranking</div>
+                  </div>
+                </div>
+
+                <div className="telemetry-step-item">
+                  <div className={`step-indicator ${currentStep > 4 ? 'done' : currentStep === 4 ? 'active' : 'pending'}`}>
+                    {currentStep > 4 ? '✓' : '4'}
+                  </div>
+                  <div>
+                    <div className="step-text-title">Grounded Assessment & Categorization</div>
+                    <div className="step-text-sub">
+                      Classifying claims into Supported, Contradicted, Insufficient, or Ambiguous
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Action Dispatch Bar: Vapi Ember + Mint CTA Binary Pair */}
           <div className="action-dispatch-bar">

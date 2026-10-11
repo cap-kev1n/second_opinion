@@ -12,7 +12,8 @@ export const ReportPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isNotFound, setIsNotFound] = useState<boolean>(!runId);
 
-  // Expanded states
+  // Minimalist Per-Claim Expansion state (collapsed by default)
+  const [expandedClaims, setExpandedClaims] = useState<Record<string, boolean>>({});
   const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({});
   const [filterVerdict, setFilterVerdict] = useState<string>('all');
 
@@ -23,11 +24,32 @@ export const ReportPage: React.FC = () => {
   const [isUploadingPdf, setIsUploadingPdf] = useState<boolean>(false);
   const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
 
+  const toggleClaimExpand = (claimId: string) => {
+    setExpandedClaims((prev) => ({
+      ...prev,
+      [claimId]: !prev[claimId],
+    }));
+  };
+
   const toggleSourceExpand = (sourceId: string) => {
     setExpandedSources((prev) => ({
       ...prev,
       [sourceId]: !prev[sourceId],
     }));
+  };
+
+  const handleToggleExpandAll = () => {
+    if (!report) return;
+    const allExpanded = report.claims.every((c) => expandedClaims[c.id]);
+    if (allExpanded) {
+      setExpandedClaims({});
+    } else {
+      const next: Record<string, boolean> = {};
+      report.claims.forEach((c) => {
+        next[c.id] = true;
+      });
+      setExpandedClaims(next);
+    }
   };
 
   const handleUploadAdditionalPdf = async (e: React.FormEvent) => {
@@ -55,7 +77,6 @@ export const ReportPage: React.FC = () => {
       setAdditionalPdfFile(null);
       setAdditionalPdfTitle('');
       setShowPdfUpload(false);
-      // Auto-run full verification on the new source
       await runFullVerification(runId);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to attach PDF source document.';
@@ -73,12 +94,11 @@ export const ReportPage: React.FC = () => {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Automated verification failed.';
       setErrorMessage(msg);
-      // Try fetching current status
       try {
         const fallback = await apiClient.getReport(id);
         setReport(fallback);
       } catch {
-        // Retain view
+        // Retain current view
       }
     } finally {
       setIsVerifyingAll(false);
@@ -100,7 +120,6 @@ export const ReportPage: React.FC = () => {
         setReport(data);
         setLoading(false);
 
-        // If the run has claims not yet assessed, auto-run verification!
         const needsAssessment =
           data.claims.length === 0 ||
           data.claims.some((c) => c.verdict === null) ||
@@ -135,6 +154,9 @@ export const ReportPage: React.FC = () => {
     return true;
   });
 
+  const areAllClaimsExpanded =
+    report && report.claims.length > 0 && report.claims.every((c) => expandedClaims[c.id]);
+
   return (
     <div>
       {/* Top Navigation Bar */}
@@ -148,13 +170,13 @@ export const ReportPage: React.FC = () => {
           </div>
 
           <div className="nav-actions">
-            <Link to="/" className="pill-button pill-amber">
+            <Link to="/" className="pill-button pill-mint">
               ← New Verification
             </Link>
             {runId && (
               <button
                 type="button"
-                className="pill-button pill-green"
+                className="pill-button pill-ember"
                 disabled={isVerifyingAll || loading}
                 onClick={() => runFullVerification(runId)}
               >
@@ -163,91 +185,94 @@ export const ReportPage: React.FC = () => {
             )}
             <button
               type="button"
-              className="pill-button pill-blue"
+              className="pill-button"
+              style={{
+                color: 'var(--color-cream-text)',
+                borderColor: 'var(--color-iron-border)',
+                background: 'transparent',
+              }}
               onClick={() => setShowPdfUpload(!showPdfUpload)}
             >
-              + Attach Source PDF
+              + Attach PDF
             </button>
           </div>
         </div>
       </nav>
 
       {/* Main Content Column */}
-      <main className="page-column">
+      <main className="page-column desktop-wide">
         {/* Loading State */}
         {loading && (
           <section className="specimen-card" style={{ textAlign: 'center', padding: '64px 32px' }}>
-            <div className="spinner-glyph" style={{ fontSize: '28px', color: 'var(--color-specimen-green)', marginBottom: '16px' }}>
+            <div className="spinner-glyph" style={{ fontSize: '28px', color: 'var(--color-mint-pulse)', marginBottom: '16px' }}>
               ⚙
             </div>
-            <h2 style={{ fontSize: '22px', color: 'var(--color-ghost-white)', marginBottom: '8px' }}>
-              Retrieving Verification Run...
+            <h2 style={{ fontSize: '18px', fontWeight: 400, color: 'var(--color-cream-text)', marginBottom: '8px' }}>
+              Retrieving Verification Specimen
             </h2>
-            <p className="prose-text" style={{ color: 'var(--color-mist)' }}>
-              Querying immutable database records and source fingerprints for run {runId}
+            <p className="prose-text" style={{ color: 'var(--color-zinc-mute)', fontSize: '14px' }}>
+              Fetching claim categorizations, source hashes, and evidence passages...
             </p>
           </section>
         )}
 
-        {/* 404 Not Found State */}
+        {/* Not Found State */}
         {!loading && isNotFound && (
           <section className="specimen-card" style={{ textAlign: 'center', padding: '64px 32px' }}>
-            <div style={{ fontSize: '36px', marginBottom: '16px' }}>🔍</div>
-            <h2 style={{ fontSize: '24px', color: 'var(--color-ghost-white)', marginBottom: '12px' }}>
-              Verification Record Not Found
+            <div style={{ fontSize: '32px', color: 'var(--color-ember-orange)', marginBottom: '16px' }}>
+              ⚠
+            </div>
+            <h2 style={{ fontSize: '20px', fontWeight: 400, color: 'var(--color-cream-text)', marginBottom: '8px' }}>
+              Audit Report Not Found
             </h2>
-            <p className="prose-text" style={{ color: 'var(--color-mist)', marginBottom: '24px' }}>
-              No audit records exist for run ID <code>{runId}</code>.
+            <p className="prose-text" style={{ color: 'var(--color-zinc-mute)', marginBottom: '24px' }}>
+              No audit run was identified for ID: <code>{runId}</code>.
             </p>
-            <Link to="/" className="pill-button pill-green">
-              Return to Verification Terminal
+            <Link to="/" className="pill-button pill-ember">
+              Return to Verification Console
             </Link>
           </section>
         )}
 
-        {/* Server Error State */}
-        {!loading && errorMessage && !isNotFound && (
-          <section className="specimen-alert specimen-alert-danger" role="alert">
+        {/* System Fault Alert */}
+        {errorMessage && (
+          <div className="specimen-alert specimen-alert-danger" role="alert">
             <span>▲</span>
-            <div style={{ flex: 1 }}>
-              <strong>Audit Error:</strong> {errorMessage}
+            <div>
+              <strong>SYSTEM NOTICE:</strong> {errorMessage}
             </div>
-            {runId && (
-              <button
-                type="button"
-                className="pill-button pill-red"
-                onClick={() => runFullVerification(runId)}
-              >
-                Retry
-              </button>
-            )}
-          </section>
+          </div>
         )}
 
-        {/* Additional PDF Ingestion Drawer */}
+        {/* Additional PDF Source Drawer */}
         {showPdfUpload && (
-          <section className="specimen-card" style={{ border: '1px solid rgba(99, 179, 237, 0.3)' }}>
-            <div className="section-heading" style={{ fontSize: '18px', marginBottom: '16px' }}>
-              <span className="heading-glyph">⚙</span> Attach Ground-Truth PDF Document
+          <section className="specimen-card" style={{ marginBottom: 'var(--spacing-16)' }}>
+            <div className="card-header-bar">
+              <span className="card-label">ATTACH SUPPLEMENTAL REFERENCE PDF</span>
+              <button
+                type="button"
+                onClick={() => setShowPdfUpload(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--color-zinc-mute)', cursor: 'pointer', fontSize: '13px' }}
+              >
+                ✕ Close
+              </button>
             </div>
 
             {pdfUploadError && (
               <div className="specimen-alert specimen-alert-danger" style={{ marginBottom: '16px' }}>
-                {pdfUploadError}
+                <span>⚠</span>
+                <div>{pdfUploadError}</div>
               </div>
             )}
 
             <form onSubmit={handleUploadAdditionalPdf}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '13px', color: 'var(--color-mist)', display: 'block', marginBottom: '6px' }}>
-                  Document Title:
-                </label>
+              <div style={{ marginBottom: '12px' }}>
                 <input
                   type="text"
                   className="terminal-input-single"
                   value={additionalPdfTitle}
                   onChange={(e) => setAdditionalPdfTitle(e.target.value)}
-                  placeholder="e.g. Supplemental Field Guidelines.pdf"
+                  placeholder="Optional document title (e.g. Reference Manual Vol 2.pdf)"
                 />
               </div>
 
@@ -269,14 +294,15 @@ export const ReportPage: React.FC = () => {
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   type="submit"
-                  className="pill-button pill-green"
+                  className="pill-button pill-mint"
                   disabled={isUploadingPdf || !additionalPdfFile}
                 >
                   {isUploadingPdf ? 'Uploading & Parsing...' : 'Attach & Re-Audit'}
                 </button>
                 <button
                   type="button"
-                  className="pill-button pill-amber"
+                  className="pill-button"
+                  style={{ color: 'var(--color-zinc-mute)', borderColor: 'var(--color-iron-border)', background: 'transparent' }}
                   onClick={() => setShowPdfUpload(false)}
                 >
                   Cancel
@@ -290,37 +316,48 @@ export const ReportPage: React.FC = () => {
         {!loading && report && (
           <>
             {/* Header Telemetry Status Bar */}
-            <section className="specimen-card" style={{ padding: '24px 32px' }}>
-              <div className="card-header-bar">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span className="heading-glyph">⚙</span>
-                  <h1 style={{ fontSize: '20px', fontWeight: 400, color: 'var(--color-ghost-white)', margin: 0 }}>
-                    Audited Verification Report
+            <section className="specimen-card" style={{ padding: '20px 24px', marginBottom: 'var(--spacing-16)' }}>
+              <div className="card-header-bar" style={{ marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ color: 'var(--color-mint-pulse)' }}>◈</span>
+                  <h1 style={{ fontSize: '18px', fontWeight: 300, color: 'var(--color-cream-text)', margin: 0, letterSpacing: '0.02em' }}>
+                    AUDIT REPORT
                   </h1>
                 </div>
                 <span className="card-metadata">
-                  ID: <code style={{ color: 'var(--color-portal-blue)' }}>{report.run_id}</code>
+                  ID: <code style={{ color: 'var(--color-cream-text)' }}>{report.run_id}</code>
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <div className={`verdict-specimen-badge ${
-                  report.status === 'completed' ? 'badge-supported' : 'badge-ambiguous'
-                }`}>
-                  {report.status.toUpperCase()}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className={`verdict-specimen-badge ${
+                    report.status === 'completed' ? 'badge-supported' : 'badge-ambiguous'
+                  }`}>
+                    {report.status.toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: '13px', color: 'var(--color-zinc-mute)' }}>
+                    {report.summary.coverage_note}
+                  </span>
                 </div>
-                <span style={{ fontSize: '14px', color: 'var(--color-mist)' }}>
-                  {report.summary.coverage_note}
-                </span>
+
+                <div style={{ fontSize: '12px', fontFamily: 'var(--font-geist-mono)', color: 'var(--color-zinc-mute)' }}>
+                  CREATED: {new Date(report.created_at).toLocaleTimeString()}
+                </div>
               </div>
             </section>
 
-            {/* Specimen Metrics Taxonomy Bar */}
+            {/* Specimen Metrics Filter Bar */}
             <section className="metrics-specimen-bar">
               <div
                 className="metric-specimen-cell"
-                style={{ cursor: 'pointer', border: filterVerdict === 'all' ? '1px solid var(--color-fog)' : undefined }}
+                style={{
+                  cursor: 'pointer',
+                  borderColor: filterVerdict === 'all' ? 'var(--color-cream-text)' : undefined,
+                  background: filterVerdict === 'all' ? 'var(--color-slab-elevated)' : undefined,
+                }}
                 onClick={() => setFilterVerdict('all')}
+                title="View all claims"
               >
                 <div className="metric-value">{report.summary.total_claims}</div>
                 <div className="metric-label">Total Claims</div>
@@ -330,27 +367,29 @@ export const ReportPage: React.FC = () => {
                 className="metric-specimen-cell"
                 style={{
                   cursor: 'pointer',
-                  border: filterVerdict === 'supported' ? '1px solid var(--color-specimen-green)' : undefined,
-                  boxShadow: filterVerdict === 'supported' ? 'var(--glow-green)' : undefined
+                  borderColor: filterVerdict === 'supported' ? 'var(--color-mint-pulse)' : undefined,
+                  background: filterVerdict === 'supported' ? 'var(--color-slab-elevated)' : undefined,
                 }}
                 onClick={() => setFilterVerdict('supported')}
+                title="Filter by Supported"
               >
-                <div className="metric-value" style={{ color: 'var(--color-specimen-green)' }}>
+                <div className="metric-value" style={{ color: 'var(--color-mint-pulse)' }}>
                   {report.summary.supported}
                 </div>
-                <div className="metric-label">Correct / Supported</div>
+                <div className="metric-label">Supported</div>
               </div>
 
               <div
                 className="metric-specimen-cell"
                 style={{
                   cursor: 'pointer',
-                  border: filterVerdict === 'contradicted' ? '1px solid var(--color-fault-red)' : undefined,
-                  boxShadow: filterVerdict === 'contradicted' ? 'var(--glow-red)' : undefined
+                  borderColor: filterVerdict === 'contradicted' ? 'var(--color-ember-orange)' : undefined,
+                  background: filterVerdict === 'contradicted' ? 'var(--color-slab-elevated)' : undefined,
                 }}
                 onClick={() => setFilterVerdict('contradicted')}
+                title="Filter by Contradicted"
               >
-                <div className="metric-value" style={{ color: 'var(--color-fault-red)' }}>
+                <div className="metric-value" style={{ color: 'var(--color-ember-orange)' }}>
                   {report.summary.contradicted}
                 </div>
                 <div className="metric-label">Contradicted</div>
@@ -360,163 +399,390 @@ export const ReportPage: React.FC = () => {
                 className="metric-specimen-cell"
                 style={{
                   cursor: 'pointer',
-                  border: filterVerdict === 'insufficient' ? '1px solid var(--color-warning-amber)' : undefined,
-                  boxShadow: filterVerdict === 'insufficient' ? 'var(--glow-amber)' : undefined
+                  borderColor: filterVerdict === 'insufficient' ? '#f59e0b' : undefined,
+                  background: filterVerdict === 'insufficient' ? 'var(--color-slab-elevated)' : undefined,
                 }}
                 onClick={() => setFilterVerdict('insufficient')}
+                title="Filter by Insufficient Evidence"
               >
-                <div className="metric-value" style={{ color: 'var(--color-warning-amber)' }}>
+                <div className="metric-value" style={{ color: '#f59e0b' }}>
                   {report.summary.insufficiently_supported}
                 </div>
-                <div className="metric-label">Insufficient Evidence</div>
+                <div className="metric-label">Insufficient</div>
               </div>
 
               <div
                 className="metric-specimen-cell"
                 style={{
                   cursor: 'pointer',
-                  border: filterVerdict === 'ambiguous' ? '1px solid var(--color-portal-blue)' : undefined,
-                  boxShadow: filterVerdict === 'ambiguous' ? 'var(--glow-blue)' : undefined
+                  borderColor: filterVerdict === 'ambiguous' ? '#38bdf8' : undefined,
+                  background: filterVerdict === 'ambiguous' ? 'var(--color-slab-elevated)' : undefined,
                 }}
                 onClick={() => setFilterVerdict('ambiguous')}
+                title="Filter by Ambiguous"
               >
-                <div className="metric-value" style={{ color: 'var(--color-portal-blue)' }}>
+                <div className="metric-value" style={{ color: '#38bdf8' }}>
                   {report.summary.ambiguous}
                 </div>
                 <div className="metric-label">Ambiguous</div>
               </div>
             </section>
 
-            {/* Original AI Answer Section */}
-            <section className="specimen-card">
-              <div className="section-heading" style={{ fontSize: '18px', marginBottom: '12px' }}>
-                <span className="heading-glyph">ℹ</span> Audited AI Answer
+            {/* Collapsible: Audited AI Answer (Clean Minimalist — Collapsed by default) */}
+            <details className="minimal-collapse-card" style={{ marginBottom: 'var(--spacing-16)' }}>
+              <summary className="minimal-collapse-summary">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>▸</span>
+                  <span>ORIGINAL AI ANSWER</span>
+                  <span style={{ opacity: 0.6, fontSize: '11px' }}>
+                    ({report.original_answer.length} characters)
+                  </span>
+                </span>
+                <span style={{ color: 'var(--color-zinc-mute)', fontSize: '11px' }}>
+                  CLICK TO VIEW FULL TEXT
+                </span>
+              </summary>
+              <div className="minimal-collapse-content">
+                <div
+                  style={{
+                    backgroundColor: 'var(--color-void-canvas)',
+                    padding: '16px',
+                    borderRadius: '5.6px',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    color: 'var(--color-cream-text)',
+                    border: '1px solid var(--color-iron-border)',
+                    whiteSpace: 'pre-wrap',
+                    maxHeight: '380px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  {report.original_answer}
+                </div>
               </div>
+            </details>
+
+            {/* Collapsible: Preserved Reference Documents (Collapsed by default) */}
+            <details className="minimal-collapse-card" style={{ marginBottom: 'var(--spacing-16)' }}>
+              <summary className="minimal-collapse-summary">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>▸</span>
+                  <span>ATTACHED REFERENCE SOURCES</span>
+                  <span style={{ opacity: 0.6, fontSize: '11px' }}>
+                    ({report.sources.length} document{report.sources.length > 1 ? 's' : ''})
+                  </span>
+                </span>
+                <span style={{ color: 'var(--color-zinc-mute)', fontSize: '11px' }}>
+                  CLICK TO VIEW SOURCES
+                </span>
+              </summary>
+              <div className="minimal-collapse-content">
+                {report.sources.map((src) => {
+                  const isSrcExpanded = expandedSources[src.id];
+                  return (
+                    <div
+                      key={src.id}
+                      style={{
+                        backgroundColor: 'var(--color-void-canvas)',
+                        border: '1px solid var(--color-iron-border)',
+                        borderRadius: '5.6px',
+                        padding: '12px 16px',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <div>
+                          <strong style={{ color: 'var(--color-cream-text)', fontSize: '14px' }}>
+                            {src.title}
+                          </strong>
+                          <div style={{ fontSize: '11px', fontFamily: 'var(--font-geist-mono)', color: 'var(--color-zinc-mute)', marginTop: '2px' }}>
+                            TYPE: {src.source_type.toUpperCase()} • LENGTH: {src.content_length} CHARS
+                            {src.page_count ? ` • ${src.page_count} PAGES` : ''}
+                            {src.content_hash ? ` • HASH: ${src.content_hash.slice(0, 12)}...` : ''}
+                          </div>
+                        </div>
+
+                        {src.content && (
+                          <button
+                            type="button"
+                            className="minimal-claim-expand-btn"
+                            onClick={() => toggleSourceExpand(src.id)}
+                          >
+                            {isSrcExpanded ? 'Hide Full Content ▴' : 'Inspect Text ▾'}
+                          </button>
+                        )}
+                      </div>
+
+                      {isSrcExpanded && src.content && (
+                        <div
+                          style={{
+                            marginTop: '12px',
+                            padding: '12px',
+                            backgroundColor: 'var(--color-carbon-surface)',
+                            borderRadius: '4px',
+                            fontSize: '12.5px',
+                            maxHeight: '260px',
+                            overflowY: 'auto',
+                            whiteSpace: 'pre-wrap',
+                            border: '1px solid var(--color-iron-border)',
+                            color: 'var(--color-cream-text)',
+                          }}
+                        >
+                          {src.content}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+
+            {/* Collapsible: Direct Quotation Audits (If present, Collapsed by default) */}
+            {report.quote_audits && report.quote_audits.length > 0 && (
+              <details className="minimal-collapse-card" style={{ marginBottom: 'var(--spacing-16)' }}>
+                <summary className="minimal-collapse-summary">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>▸</span>
+                    <span>DIRECT QUOTATION AUDITS</span>
+                    <span style={{ opacity: 0.6, fontSize: '11px' }}>
+                      ({report.quote_audits.length} quote{report.quote_audits.length > 1 ? 's' : ''})
+                    </span>
+                  </span>
+                  <span style={{ color: 'var(--color-zinc-mute)', fontSize: '11px' }}>
+                    CLICK TO INSPECT QUOTES
+                  </span>
+                </summary>
+                <div className="minimal-collapse-content">
+                  {report.quote_audits.map((qa) => (
+                    <div
+                      key={qa.id}
+                      style={{
+                        backgroundColor: 'var(--color-void-canvas)',
+                        border: '1px solid var(--color-iron-border)',
+                        borderRadius: '5.6px',
+                        padding: '12px 16px',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '13.5px', color: 'var(--color-cream-text)' }}>
+                          "{qa.quotation_text}"
+                        </span>
+                        <span className={`verdict-specimen-badge ${
+                          qa.match_status === 'exact_match' ? 'badge-supported' : 'badge-contradicted'
+                        }`}>
+                          {qa.match_status.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
+
+                      {qa.matched_source_title && (
+                        <div style={{ fontSize: '12px', color: 'var(--color-mint-pulse)' }}>
+                          SOURCE: {qa.matched_source_title} {qa.page_number ? `(Page ${qa.page_number})` : ''}
+                        </div>
+                      )}
+                      {qa.source_excerpt && (
+                        <div style={{ fontSize: '12.5px', color: 'var(--color-zinc-mute)', fontStyle: 'italic', marginTop: '4px' }}>
+                          Matched text: "{qa.source_excerpt}"
+                        </div>
+                      )}
+                      {qa.differences && (
+                        <div style={{ fontSize: '12px', color: 'var(--color-ember-orange)', marginTop: '4px' }}>
+                          Discrepancy: {qa.differences}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+
+            {/* Categorized Factual Claims Section — Minimalist Accordion List */}
+            <section style={{ marginTop: 'var(--spacing-16)' }}>
               <div
                 style={{
-                  backgroundColor: 'var(--color-cosmic-void)',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  lineHeight: '1.6',
-                  color: 'var(--color-mist)',
-                  border: '1px solid rgba(229, 231, 235, 0.08)',
-                  whiteSpace: 'pre-wrap',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '8px 4px 14px',
+                  borderBottom: '1px solid var(--color-iron-border)',
+                  marginBottom: 'var(--spacing-12)',
+                  flexWrap: 'wrap',
+                  gap: '8px',
                 }}
               >
-                {report.original_answer}
-              </div>
-            </section>
-
-            {/* Categorized Factual Claims Section */}
-            <section>
-              <div className="section-heading" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className="heading-glyph">✦</span>
-                  <span>Factual Claims & Categorization</span>
-                  <span style={{ fontSize: '14px', color: 'var(--color-mist)', opacity: 0.7 }}>
-                    ({filteredClaims.length} of {report.claims.length})
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '12px', letterSpacing: '0.08em', color: 'var(--color-cream-text)', textTransform: 'uppercase' }}>
+                    FACTUAL CLAIMS
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
+                    ({filteredClaims.length} of {report.claims.length} claims{filterVerdict !== 'all' ? ` matching ${filterVerdict}` : ''})
                   </span>
                 </div>
 
-                {filterVerdict !== 'all' && (
-                  <button
-                    type="button"
-                    className="pill-button pill-amber"
-                    onClick={() => setFilterVerdict('all')}
-                    style={{ fontSize: '12px', padding: '4px 12px' }}
-                  >
-                    Clear Filter
-                  </button>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {filterVerdict !== 'all' && (
+                    <button
+                      type="button"
+                      className="minimal-claim-expand-btn"
+                      onClick={() => setFilterVerdict('all')}
+                      style={{ color: 'var(--color-ember-orange)', borderColor: 'var(--color-ember-orange)' }}
+                    >
+                      Clear Filter ✕
+                    </button>
+                  )}
+                  {filteredClaims.length > 0 && (
+                    <button
+                      type="button"
+                      className="minimal-claim-expand-btn"
+                      onClick={handleToggleExpandAll}
+                      title="Expand or collapse all claims"
+                    >
+                      {areAllClaimsExpanded ? 'Collapse All ▴' : 'Expand All ▾'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {filteredClaims.length === 0 ? (
                 <div className="specimen-card" style={{ textAlign: 'center', padding: '32px' }}>
-                  <p className="prose-text" style={{ color: 'var(--color-mist)' }}>
-                    No claims match the selected verdict filter.
+                  <p className="prose-text" style={{ color: 'var(--color-zinc-mute)' }}>
+                    No claims match the active filter criteria.
                   </p>
+                  <button
+                    type="button"
+                    className="pill-button pill-mint"
+                    style={{ marginTop: '12px' }}
+                    onClick={() => setFilterVerdict('all')}
+                  >
+                    View All Claims
+                  </button>
                 </div>
               ) : (
                 filteredClaims.map((claim, idx) => {
+                  const isExpanded = Boolean(expandedClaims[claim.id]);
+
                   let badgeClass = 'badge-insufficient';
-                  let verdictLabel = 'Insufficient Evidence';
+                  let verdictLabel = 'INSUFFICIENT';
 
                   if (claim.verdict === 'supported') {
                     badgeClass = 'badge-supported';
-                    verdictLabel = 'Supported / Correct';
+                    verdictLabel = 'SUPPORTED';
                   } else if (claim.verdict === 'contradicted') {
                     badgeClass = 'badge-contradicted';
-                    verdictLabel = 'Contradicted';
+                    verdictLabel = 'CONTRADICTED';
                   } else if (claim.verdict === 'ambiguous') {
                     badgeClass = 'badge-ambiguous';
-                    verdictLabel = 'Ambiguous';
+                    verdictLabel = 'AMBIGUOUS';
                   }
 
+                  const claimNum = String(idx + 1).padStart(2, '0');
+
                   return (
-                    <article key={claim.id} className="claim-specimen-card">
-                      <div className="claim-header-row">
-                        <span className="claim-index-tag">
-                          SPECIMEN #{idx + 1}
-                        </span>
-                        <div className={`verdict-specimen-badge ${badgeClass}`}>
-                          {verdictLabel}
-                        </div>
-                      </div>
-
-                      {/* Normalized Claim Statement */}
-                      <div className="claim-statement-text">
-                        "{claim.normalized_text}"
-                      </div>
-
-                      {/* Reasoning Analysis */}
-                      {claim.reasoning && (
-                        <div className="claim-reasoning-panel">
-                          <strong style={{ color: 'var(--color-ghost-white)', display: 'block', marginBottom: '4px' }}>
-                            Auditor Grounded Assessment:
-                          </strong>
-                          <p style={{ margin: 0, lineHeight: 1.5 }}>{claim.reasoning}</p>
-                          {claim.limitations && (
-                            <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-warning-amber)' }}>
-                              ⚠ Limitations: {claim.limitations}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Cited Evidence Passages */}
-                      {claim.evidence && claim.evidence.length > 0 && (
-                        <div>
-                          <span style={{ fontSize: '12px', color: 'var(--color-mist)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Cited Reference Evidence ({claim.evidence.length} passage{claim.evidence.length > 1 ? 's' : ''}):
+                    <article key={claim.id} className="minimal-claim-item">
+                      {/* Minimalist Claim Header (Click anywhere to expand/collapse) */}
+                      <div
+                        className="minimal-claim-header"
+                        onClick={() => toggleClaimExpand(claim.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleClaimExpand(claim.id);
+                          }
+                        }}
+                      >
+                        <div className="minimal-claim-title-group">
+                          <span
+                            style={{
+                              fontFamily: 'var(--font-geist-mono)',
+                              fontSize: '11px',
+                              letterSpacing: '0.06em',
+                              color: 'var(--color-zinc-mute)',
+                              minWidth: '24px',
+                            }}
+                          >
+                            #{claimNum}
                           </span>
-                          {claim.evidence.map((ev) => (
-                            <div key={ev.id} className="evidence-passage-box">
-                              <div className="evidence-source-tag">
-                                <span>📄 {ev.source_title}</span>
-                                {ev.page_number && <span>• Page {ev.page_number}</span>}
-                                {ev.relevance_score && (
-                                  <span style={{ color: 'var(--color-specimen-green)' }}>
-                                    • BM25 Score: {ev.relevance_score.toFixed(2)}
-                                  </span>
-                                )}
+
+                          <div className={`verdict-specimen-badge ${badgeClass}`}>
+                            {verdictLabel}
+                          </div>
+
+                          <div className="minimal-claim-text">
+                            "{claim.normalized_text}"
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="minimal-claim-expand-btn"
+                          aria-expanded={isExpanded}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleClaimExpand(claim.id);
+                          }}
+                        >
+                          {isExpanded ? 'Collapse ▴' : 'Details ▾'}
+                        </button>
+                      </div>
+
+                      {/* Minimalist Claim Body (Only expanded when user explicitly clicks) */}
+                      {isExpanded && (
+                        <div className="minimal-claim-body">
+                          {/* Grounded Assessment */}
+                          {claim.reasoning && (
+                            <div style={{ marginBottom: '14px' }}>
+                              <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '11px', color: 'var(--color-zinc-mute)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                                AUDITOR ASSESSMENT
                               </div>
-                              <div style={{ color: 'var(--color-ice-blue)', fontStyle: 'italic', marginBottom: '6px' }}>
-                                "{ev.excerpt}"
-                              </div>
-                              {ev.explanation && (
-                                <div style={{ fontSize: '12px', color: 'var(--color-mist)', opacity: 0.85 }}>
-                                  Correlation: {ev.explanation}
-                                </div>
+                              <p style={{ margin: 0, fontSize: '13.5px', lineHeight: '1.55', color: 'var(--color-cream-text)' }}>
+                                {claim.reasoning}
+                              </p>
+                              {claim.limitations && (
+                                <p style={{ marginTop: '8px', fontSize: '12.5px', color: '#f59e0b', margin: '8px 0 0' }}>
+                                  ⚠ Limitations: {claim.limitations}
+                                </p>
                               )}
                             </div>
-                          ))}
-                        </div>
-                      )}
+                          )}
 
-                      {(!claim.evidence || claim.evidence.length === 0) && (
-                        <div style={{ fontSize: '13px', color: 'var(--color-mist)', opacity: 0.65, fontStyle: 'italic', marginTop: '8px' }}>
-                          No qualifying evidence passage was located in user-supplied reference material.
+                          {/* Cited Evidence Passages */}
+                          {claim.evidence && claim.evidence.length > 0 && (
+                            <div>
+                              <div style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '11px', color: 'var(--color-zinc-mute)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+                                CITED EVIDENCE ({claim.evidence.length} PASSAGE{claim.evidence.length > 1 ? 'S' : ''})
+                              </div>
+
+                              {claim.evidence.map((ev) => (
+                                <div key={ev.id} className="evidence-passage-box">
+                                  <div className="evidence-source-tag">
+                                    <span>📄 {ev.source_title}</span>
+                                    {ev.page_number && <span>• Page {ev.page_number}</span>}
+                                    {ev.relevance_score && (
+                                      <span style={{ color: 'var(--color-mint-pulse)' }}>
+                                        • BM25 Score: {ev.relevance_score.toFixed(2)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div style={{ color: 'var(--color-cream-text)', fontStyle: 'italic', marginBottom: '6px', fontSize: '13px' }}>
+                                    "{ev.excerpt}"
+                                  </div>
+                                  {ev.explanation && (
+                                    <div style={{ fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
+                                      Correlation: {ev.explanation}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {(!claim.evidence || claim.evidence.length === 0) && (
+                            <div style={{ fontSize: '12.5px', color: 'var(--color-zinc-mute)', fontStyle: 'italic', marginTop: '6px' }}>
+                              No qualifying evidence passage was located in reference material.
+                            </div>
+                          )}
                         </div>
                       )}
                     </article>
@@ -525,112 +791,8 @@ export const ReportPage: React.FC = () => {
               )}
             </section>
 
-            {/* Direct Quotation Audits Section */}
-            {report.quote_audits && report.quote_audits.length > 0 && (
-              <section className="specimen-card">
-                <div className="section-heading" style={{ fontSize: '18px', marginBottom: '16px' }}>
-                  <span className="heading-glyph">⚙</span> Direct Quotation Audits
-                </div>
-                <p className="prose-text" style={{ fontSize: '14px', color: 'var(--color-mist)', marginBottom: '16px' }}>
-                  Verifies whether quoted strings in the original AI reply appear verbatim in reference material:
-                </p>
-
-                {report.quote_audits.map((qa) => (
-                  <div
-                    key={qa.id}
-                    style={{
-                      backgroundColor: 'var(--color-cosmic-void)',
-                      border: '1px solid rgba(229, 231, 235, 0.08)',
-                      borderRadius: '8px',
-                      padding: '16px',
-                      marginBottom: '12px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '13px', color: 'var(--color-mist)' }}>
-                        Quotation: <strong style={{ color: 'var(--color-ghost-white)' }}>"{qa.quotation_text}"</strong>
-                      </span>
-                      <span className={`verdict-specimen-badge ${
-                        qa.match_status === 'exact_match' ? 'badge-supported' : 'badge-contradicted'
-                      }`}>
-                        {qa.match_status.replace('_', ' ').toUpperCase()}
-                      </span>
-                    </div>
-
-                    {qa.matched_source_title && (
-                      <div style={{ fontSize: '13px', color: 'var(--color-portal-blue)', marginBottom: '4px' }}>
-                        Source: {qa.matched_source_title} {qa.page_number ? `(Page ${qa.page_number})` : ''}
-                      </div>
-                    )}
-                    {qa.source_excerpt && (
-                      <div style={{ fontSize: '13px', color: 'var(--color-mist)', fontStyle: 'italic' }}>
-                        Source text: "{qa.source_excerpt}"
-                      </div>
-                    )}
-                    {qa.differences && (
-                      <div style={{ fontSize: '12px', color: 'var(--color-fault-red)', marginTop: '4px' }}>
-                        Discrepancy: {qa.differences}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </section>
-            )}
-
-            {/* Ground-Truth Reference Document Inspector */}
-            <section className="specimen-card">
-              <div className="section-heading" style={{ fontSize: '18px', marginBottom: '16px' }}>
-                <span className="heading-glyph">ℹ</span> Preserved Reference Documents
-              </div>
-
-              {report.sources.map((src) => {
-                const isExpanded = expandedSources[src.id];
-                return (
-                  <div key={src.id} className="source-inspector-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
-                      <strong style={{ color: 'var(--color-ghost-white)', fontSize: '15px' }}>
-                        {src.title}
-                      </strong>
-                      <button
-                        type="button"
-                        className="pill-button pill-amber"
-                        onClick={() => toggleSourceExpand(src.id)}
-                        style={{ fontSize: '12px', padding: '4px 12px' }}
-                      >
-                        {isExpanded ? 'Hide Full Content' : 'Inspect Full Text'}
-                      </button>
-                    </div>
-
-                    <div className="source-fingerprint" style={{ marginBottom: '8px' }}>
-                      SHA-256: {src.content_hash} • {src.content_length} characters • Type: {src.source_type.toUpperCase()}
-                      {src.page_count ? ` • ${src.page_count} pages` : ''}
-                    </div>
-
-                    {isExpanded && (
-                      <div
-                        style={{
-                          marginTop: '12px',
-                          padding: '16px',
-                          backgroundColor: 'var(--color-cosmic-void)',
-                          borderRadius: '8px',
-                          fontSize: '13px',
-                          maxHeight: '360px',
-                          overflowY: 'auto',
-                          whiteSpace: 'pre-wrap',
-                          border: '1px solid rgba(229, 231, 235, 0.08)',
-                          color: 'var(--color-mist)',
-                        }}
-                      >
-                        {src.content}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </section>
-
             {/* Scope Disclaimer */}
-            <footer style={{ textAlign: 'center', fontSize: '13px', color: 'var(--color-mist)', opacity: 0.65, paddingTop: '16px' }}>
+            <footer style={{ textAlign: 'center', fontSize: '12px', color: 'var(--color-zinc-mute)', paddingTop: '28px', paddingBottom: '32px' }}>
               {report.scope_disclaimer}
             </footer>
           </>
