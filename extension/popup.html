@@ -7,122 +7,152 @@
     body {
       width: 320px;
       margin: 0;
-      padding: 16px;
-      background: #06051d;
-      color: #cad5e2;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 18px;
+      background: #0e0e13;
+      color: #fffaea;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 13px;
     }
     .header {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid rgba(229, 231, 235, 0.1);
-      padding-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #27272a;
+      padding-bottom: 12px;
     }
     .logo {
       width: 24px;
       height: 24px;
-      background: #0f1c36;
-      border: 1px solid #00bc7d;
-      border-radius: 6px;
-      color: #00bc7d;
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 5.6px;
+      color: #e96b34;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      font-size: 14px;
     }
     .title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      color: #fffaea;
+      letter-spacing: -0.2px;
+    }
+    .subtitle {
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      color: #71717a;
+      letter-spacing: 0.05em;
     }
     .form-group {
       margin-bottom: 14px;
     }
     label {
       display: block;
-      font-size: 12px;
-      color: #94a3b8;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #71717a;
       margin-bottom: 6px;
     }
     input[type="text"] {
       width: 100%;
       box-sizing: border-box;
-      background: #0f1c36;
-      border: 1px solid rgba(229, 231, 235, 0.2);
-      border-radius: 6px;
-      padding: 8px 10px;
-      color: #ffffff;
-      font-size: 13px;
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 5.6px;
+      padding: 9px 12px;
+      color: #fffaea;
+      font-family: 'Geist Mono', monospace;
+      font-size: 12.5px;
       outline: none;
+      transition: border-color 0.2s;
     }
     input[type="text"]:focus {
-      border-color: #00bc7d;
+      border-color: #e96b34;
     }
     .status-msg {
-      font-size: 12px;
-      color: #00bc7d;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11.5px;
+      color: #62f6b5;
       margin-top: 6px;
       min-height: 16px;
     }
     .btn-row {
       display: flex;
       gap: 8px;
-      margin-top: 12px;
+      margin-top: 14px;
     }
-    button {
+    .btn-primary {
       flex: 1;
-      background: #00bc7d;
-      color: #06051d;
+      background: #e96b34;
+      color: #fffaea;
       border: none;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-weight: 600;
-      font-size: 12px;
+      border-radius: 9999px;
+      padding: 9px 14px;
+      font-family: 'Geist Mono', monospace;
+      font-weight: 500;
+      font-size: 11.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: opacity 0.2s;
     }
-    button:hover {
-      background: #00d68f;
+    .btn-primary:hover {
+      opacity: 0.9;
     }
     .btn-secondary {
-      background: #1d293d;
-      color: #cad5e2;
-      border: 1px solid rgba(229, 231, 235, 0.15);
+      flex: 1;
+      background: #62f6b5;
+      color: #0e0e13;
+      border: none;
+      border-radius: 9999px;
+      padding: 9px 14px;
+      font-family: 'Geist Mono', monospace;
+      font-weight: 500;
+      font-size: 11.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
     .btn-secondary:hover {
-      background: #314062;
-      color: #ffffff;
+      opacity: 0.9;
     }
     .footer-note {
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 14px;
-      line-height: 1.4;
+      font-size: 11.5px;
+      color: #71717a;
+      margin-top: 16px;
+      line-height: 1.5;
+      border-top: 1px solid #27272a;
+      padding-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="logo">◈</div>
-    <div class="title">Second Opinion</div>
+    <div>
+      <div class="title">SECOND OPINION</div>
+      <div class="subtitle">CHATGPT AI AUDITOR</div>
+    </div>
   </div>
 
   <div class="form-group">
-    <label for="targetUrl">Second Opinion Web App URL:</label>
+    <label for="targetUrl">Web App Destination URL:</label>
     <input type="text" id="targetUrl" placeholder="http://localhost:5173" />
     <div id="statusMsg" class="status-msg"></div>
   </div>
 
   <div class="btn-row">
-    <button id="saveBtn">Save URL</button>
+    <button id="saveBtn" class="btn-primary">Save URL →</button>
     <button id="openAppBtn" class="btn-secondary">Open App</button>
   </div>
 
   <div class="footer-note">
-    Active on <strong>chatgpt.com</strong> and <strong>chat.openai.com</strong>. Click "Audit" below any response to verify.
+    Active on <strong>chatgpt.com</strong>. Look for the <code style="color:#e96b34">◈ AUDIT</code> button next to the copy icon or at the bottom-right corner!
   </div>
 
   <script src="popup.js"></script>

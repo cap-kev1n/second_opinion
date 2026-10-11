@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Second Opinion — ChatGPT AI Auditor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Adds a one-click 'Audit' button to ChatGPT responses that sends the AI reply directly to Second Opinion for factual verification.",
   "icons": {
     "16": "icons/icon-16.png",
@@ -23,7 +23,9 @@
     {
       "matches": [
         "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
+        "https://*.chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://*.openai.com/*"
       ],
       "js": [
         "content.js"
@@ -31,7 +33,8 @@
       "css": [
         "content.css"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ]
 }

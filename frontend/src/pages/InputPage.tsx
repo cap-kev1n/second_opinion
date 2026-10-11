@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
-import { AsciiSphere } from '../components/AsciiSphere';
+import { SpectrogramWaveform } from '../components/SpectrogramWaveform';
 import type {
   HealthResponse,
   SourceType,
@@ -22,7 +22,7 @@ export const InputPage: React.FC = () => {
   // Form inputs
   const [answer, setAnswer] = useState<string>('');
   const [sourceTitle, setSourceTitle] = useState<string>('Primary Reference Documentation');
-  const [sourceType, setSourceType] = useState<SourceType>('text');
+  const [sourceType, setSourceType] = useState<SourceType>('ai_crosscheck');
   const [sourceContent, setSourceContent] = useState<string>('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [prefilledFromExtension, setPrefilledFromExtension] = useState<boolean>(false);
@@ -229,7 +229,7 @@ export const InputPage: React.FC = () => {
 
   return (
     <div>
-      {/* Sticky Top Navigation Bar */}
+      {/* Top Navigation Bar (Vapi Specification: Transparent, 1px Iron divider, tracked mono links) */}
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-brand">
@@ -237,7 +237,7 @@ export const InputPage: React.FC = () => {
             <span className="nav-brand-title">SECOND OPINION</span>
             <div className="nav-status-indicator">
               <span className={`status-beacon ${healthError ? 'offline' : ''}`} />
-              <span>{healthLoading ? 'CONNECTING...' : health ? 'ONLINE' : 'OFFLINE'}</span>
+              <span>{healthLoading ? 'CONNECTING' : health ? 'SYSTEM READY' : 'OFFLINE'}</span>
             </div>
           </div>
 
@@ -262,31 +262,46 @@ export const InputPage: React.FC = () => {
             </button>
             <button
               type="button"
-              className="pill-button pill-green"
+              className="pill-button pill-ember"
               onClick={executeVerification}
               disabled={isProcessing}
               title="Audit AI Answer strictly against sources"
             >
-              {isProcessing ? 'Verifying...' : '↵ Audit [Ctrl+Enter]'}
+              {isProcessing ? 'Verifying...' : 'Audit Answer →'}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Main Container - Desktop-First Layout */}
+      {/* Main Container - Desktop-First Vapi Workspace */}
       <main className="page-column desktop-wide" onKeyDown={handleKeyDown}>
-        {/* Streamlined Hero Header */}
-        <section className="hero-visual-section hero-compact">
-          <AsciiSphere active={isProcessing} />
-          <div className="hero-content">
-            <h1 className="hero-title">Second Opinion</h1>
-            <p className="hero-subtitle prose-text">
-              Deep-ocean factual verification terminal. Evaluates AI answers strictly against user-supplied reference sources or autonomous AI cross-examination.
-            </p>
-            <div className="hero-instruction-tag">
-              <span>Paste AI reply on the left ➔ Select reference mode on the right ➔ Press <kbd>Ctrl+Enter ↵</kbd></span>
+        {/* Vapi Hero Section: Headline at weight 300, subtext, and Spectrogram Waveform Graphic */}
+        <section className="hero-vapi-section">
+          <h1 className="hero-headline">
+            Fact-checking console for generative AI
+          </h1>
+          <p className="hero-subtext">
+            Decomposes model answers into atomic factual claims and verifies them strictly against source evidence or autonomous cross-examination.
+          </p>
+
+          {/* Interactive Console Callout Pill */}
+          <button
+            type="button"
+            className="vapi-console-pill"
+            onClick={executeVerification}
+            disabled={isProcessing}
+          >
+            <span>{isProcessing ? 'RUNNING VERIFICATION PIPELINE' : 'INITIATE AUDIT CONSOLE'}</span>
+            <div className="vapi-console-dots">
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
-          </div>
+          </button>
+
+          {/* 6-Color Spectrogram Waveform Graphic (Vapi signature element) */}
+          <SpectrogramWaveform active={isProcessing} />
         </section>
 
         {/* Validation & Error Banners */}
@@ -294,7 +309,7 @@ export const InputPage: React.FC = () => {
           <div className="specimen-alert specimen-alert-warning" role="alert">
             <span>⚠</span>
             <div>
-              <strong>Input Incomplete:</strong> {validationError}
+              <strong>INPUT REQUIRED:</strong> {validationError}
             </div>
           </div>
         )}
@@ -303,7 +318,7 @@ export const InputPage: React.FC = () => {
           <div className="specimen-alert specimen-alert-danger" role="alert">
             <span>▲</span>
             <div>
-              <strong>Verification Error:</strong> {errorMessage}
+              <strong>SYSTEM FAULT:</strong> {errorMessage}
             </div>
           </div>
         )}
@@ -313,9 +328,9 @@ export const InputPage: React.FC = () => {
           <section className="telemetry-stream-card">
             <div className="telemetry-header">
               <span className="telemetry-terminal-title">
-                <span className="spinner-glyph">⚙</span> VERIFICATION TELEMETRY STREAM
+                ⚙ PIPELINE TELEMETRY STREAM
               </span>
-              <span style={{ fontSize: '12px', color: 'var(--color-mist)' }}>
+              <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
                 {stepDetail}
               </span>
             </div>
@@ -373,12 +388,12 @@ export const InputPage: React.FC = () => {
             <div className="extension-prefill-banner">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span className="prefill-tag">CHROME EXTENSION</span>
-                <span>AI reply loaded from ChatGPT. Ready to audit with autonomous AI cross-check!</span>
+                <span>Response imported from ChatGPT. Autonomous AI cross-check mode selected.</span>
               </div>
               <button
                 type="button"
                 className="pill-button"
-                style={{ padding: '4px 12px', fontSize: '12px' }}
+                style={{ padding: '4px 12px', fontSize: '11px' }}
                 onClick={() => setPrefilledFromExtension(false)}
               >
                 Dismiss
@@ -391,12 +406,12 @@ export const InputPage: React.FC = () => {
             <div className="workspace-card">
               <div className="card-header-bar">
                 <label htmlFor="ai-answer-textarea" className="card-label">
-                  <span className="heading-glyph">⚙</span> 1. AI Reply to Audit
+                  1. AI REPLY TO AUDIT
                 </label>
-                <span className="card-metadata">{answer.length} chars</span>
+                <span className="card-metadata">{answer.length} CHARS</span>
               </div>
-              <p className="prose-text" style={{ fontSize: '13.5px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
-                Paste the text from ChatGPT, Claude, Gemini, or any LLM model that requires factual auditing.
+              <p className="prose-text" style={{ fontSize: '13px', marginBottom: 'var(--spacing-16)' }}>
+                Paste the response from ChatGPT, Claude, Gemini, or any LLM model that requires factual validation.
               </p>
               <div className="workspace-card-body">
                 <textarea
@@ -405,7 +420,7 @@ export const InputPage: React.FC = () => {
                   disabled={isProcessing}
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="Paste AI reply here... (e.g. The James Webb Space Telescope was launched in 2018... Press Ctrl+Enter to audit)"
+                  placeholder="Paste AI answer text here... (Ctrl+Enter to initiate audit)"
                 />
               </div>
             </div>
@@ -414,38 +429,22 @@ export const InputPage: React.FC = () => {
             <div className="workspace-card">
               <div className="card-header-bar">
                 <label className="card-label">
-                  <span className="heading-glyph">ℹ</span> 2. Reference Source & Verification Mode
+                  2. GROUND-TRUTH REFERENCE MODE
                 </label>
                 <span className="card-metadata">
                   {sourceType === 'ai_crosscheck'
-                    ? 'Autonomous AI'
+                    ? 'AUTONOMOUS'
                     : sourceType === 'pdf'
-                    ? 'PDF Document'
-                    : 'Pasted Text'}
+                    ? 'PDF DOCUMENT'
+                    : 'PASTED TEXT'}
                 </span>
               </div>
-              <p className="prose-text" style={{ fontSize: '13.5px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-16)' }}>
-                Supply ground-truth documentation, upload a PDF, or run an autonomous AI cross-check without uploading sources.
+              <p className="prose-text" style={{ fontSize: '13px', marginBottom: 'var(--spacing-16)' }}>
+                Select autonomous AI cross-check (no upload needed), paste reference text, or upload a PDF document.
               </p>
 
               {/* 3-Way Source Mode Switcher */}
-              <div className="source-tab-tray" style={{ marginBottom: 'var(--spacing-16)' }}>
-                <button
-                  type="button"
-                  className={`source-tab-btn ${sourceType === 'text' ? 'active' : ''}`}
-                  onClick={() => setSourceType('text')}
-                  disabled={isProcessing}
-                >
-                  📄 Pasted Text
-                </button>
-                <button
-                  type="button"
-                  className={`source-tab-btn ${sourceType === 'pdf' ? 'active' : ''}`}
-                  onClick={() => setSourceType('pdf')}
-                  disabled={isProcessing}
-                >
-                  📑 Upload PDF
-                </button>
+              <div className="source-tab-tray">
                 <button
                   type="button"
                   className={`source-tab-btn crosscheck-btn ${sourceType === 'ai_crosscheck' ? 'active' : ''}`}
@@ -453,6 +452,22 @@ export const InputPage: React.FC = () => {
                   disabled={isProcessing}
                 >
                   ✦ AI Cross-Check
+                </button>
+                <button
+                  type="button"
+                  className={`source-tab-btn ${sourceType === 'text' ? 'active' : ''}`}
+                  onClick={() => setSourceType('text')}
+                  disabled={isProcessing}
+                >
+                  Pasted Text
+                </button>
+                <button
+                  type="button"
+                  className={`source-tab-btn ${sourceType === 'pdf' ? 'active' : ''}`}
+                  onClick={() => setSourceType('pdf')}
+                  disabled={isProcessing}
+                >
+                  Upload PDF
                 </button>
               </div>
 
@@ -463,24 +478,24 @@ export const InputPage: React.FC = () => {
                     <div className="crosscheck-badge">
                       <span>◈</span> AUTONOMOUS CROSS-CHECK
                     </div>
-                    <h3 style={{ color: 'var(--color-ghost-white)', fontSize: '18px', marginBottom: '8px' }}>
-                      Zero-Upload Fact Checking
+                    <h3 style={{ color: 'var(--color-cream-text)', fontSize: '16px', fontWeight: 500, marginBottom: '6px' }}>
+                      Zero-Upload Factual Verification
                     </h3>
-                    <p style={{ fontSize: '13.5px', color: 'var(--color-mist)', maxWidth: '420px', lineHeight: 1.55 }}>
-                      The verification engine will synthesize an authoritative ground-truth factual dossier and audit each claim against verified consensus.
+                    <p style={{ fontSize: '13px', color: 'var(--color-zinc-mute)', maxWidth: '420px', lineHeight: 1.5 }}>
+                      The engine compiles an objective factual reference dossier and audits each proposition against authoritative consensus without requiring external manual files.
                     </p>
                     <div className="crosscheck-feature-list">
                       <div className="crosscheck-feature-item">
                         <span className="glyph">✓</span>
-                        <span>No manual PDF or source text documentation required</span>
+                        <span>Zero manual document upload or reference pasting required</span>
                       </div>
                       <div className="crosscheck-feature-item">
                         <span className="glyph">✓</span>
-                        <span>Decomposes the AI response into atomic verifiable claims</span>
+                        <span>Isolates and validates discrete numerical and entity claims</span>
                       </div>
                       <div className="crosscheck-feature-item">
                         <span className="glyph">✓</span>
-                        <span>Cross-checks entities, dates, numbers, and historical facts</span>
+                        <span>Classifies output into Supported, Contradicted, or Ambiguous</span>
                       </div>
                     </div>
                   </div>
@@ -490,8 +505,8 @@ export const InputPage: React.FC = () => {
                 {sourceType === 'text' && (
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <div style={{ marginBottom: 'var(--spacing-12)' }}>
-                      <label htmlFor="source-title-input" style={{ fontSize: '12.5px', color: 'var(--color-mist)', display: 'block', marginBottom: '4px' }}>
-                        Source Identifier / Title (Optional):
+                      <label htmlFor="source-title-input" style={{ fontSize: '11px', color: 'var(--color-zinc-mute)', display: 'block', marginBottom: '4px' }}>
+                        SOURCE IDENTIFIER / TITLE (OPTIONAL):
                       </label>
                       <input
                         id="source-title-input"
@@ -509,7 +524,7 @@ export const InputPage: React.FC = () => {
                       disabled={isProcessing}
                       value={sourceContent}
                       onChange={(e) => setSourceContent(e.target.value)}
-                      placeholder="Paste reliable reference documentation, article text, or ground-truth excerpt here..."
+                      placeholder="Paste reliable reference documentation or ground-truth excerpt here..."
                     />
                   </div>
                 )}
@@ -518,8 +533,8 @@ export const InputPage: React.FC = () => {
                 {sourceType === 'pdf' && (
                   <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                     <div style={{ marginBottom: 'var(--spacing-12)' }}>
-                      <label htmlFor="source-title-input-pdf" style={{ fontSize: '12.5px', color: 'var(--color-mist)', display: 'block', marginBottom: '4px' }}>
-                        Document Title (Optional):
+                      <label htmlFor="source-title-input-pdf" style={{ fontSize: '11px', color: 'var(--color-zinc-mute)', display: 'block', marginBottom: '4px' }}>
+                        DOCUMENT TITLE (OPTIONAL):
                       </label>
                       <input
                         id="source-title-input-pdf"
@@ -528,11 +543,11 @@ export const InputPage: React.FC = () => {
                         disabled={isProcessing}
                         value={sourceTitle}
                         onChange={(e) => setSourceTitle(e.target.value)}
-                        placeholder="e.g. Scientific Research Paper.pdf"
+                        placeholder="e.g. Technical Research Paper.pdf"
                       />
                     </div>
                     <label htmlFor="source-pdf-file-input" style={{ flex: 1, display: 'flex', cursor: 'pointer' }}>
-                      <div className="dropzone-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div className="dropzone-container">
                         <input
                           id="source-pdf-file-input"
                           type="file"
@@ -547,13 +562,13 @@ export const InputPage: React.FC = () => {
                             }
                           }}
                         />
-                        <div style={{ color: 'var(--color-ghost-white)', fontSize: '15px', marginBottom: '6px' }}>
+                        <div style={{ color: 'var(--color-cream-text)', fontSize: '14px', marginBottom: '6px', fontWeight: 500 }}>
                           {pdfFile ? `Selected: ${pdfFile.name}` : 'Click to select PDF document'}
                         </div>
-                        <div style={{ fontSize: '13px', color: 'var(--color-mist)' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--color-zinc-mute)' }}>
                           {pdfFile
-                            ? `${(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • Text pages will be parsed automatically`
-                            : 'Supports PDF up to 10 MB, up to 100 pages'}
+                            ? `${(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • Text extracted automatically`
+                            : 'Supports PDF documents up to 10 MB, up to 100 pages'}
                         </div>
                       </div>
                     </label>
@@ -563,72 +578,80 @@ export const InputPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Action Dispatch Bar */}
-          <div className="action-dispatch-bar" style={{ marginTop: 'var(--spacing-16)' }}>
+          {/* Action Dispatch Bar: Vapi Ember + Mint CTA Binary Pair */}
+          <div className="action-dispatch-bar">
             <div className="dispatch-hint">
-              <span>Shortcut:</span>
+              <span>KEYBOARD SHORTCUT:</span>
               <kbd>Ctrl+Enter</kbd>
-              <span>or</span>
+              <span>OR</span>
               <kbd>Enter ↵</kbd>
             </div>
 
-            <button
-              type="submit"
-              className="pill-button pill-green"
-              disabled={isProcessing}
-              style={{ padding: '12px 32px', fontSize: '15.5px' }}
-            >
-              {isProcessing
-                ? 'Auditing Factual Claims...'
-                : sourceType === 'ai_crosscheck'
-                ? '↵ Cross-Check & Audit with AI'
-                : '↵ Audit Answer & Categorize Claims'}
-            </button>
+            <div style={{ display: 'flex', gap: 'var(--spacing-12)' }}>
+              <button
+                type="button"
+                className="pill-button pill-mint"
+                onClick={handleLoadSample}
+                disabled={isProcessing}
+              >
+                Sample Data
+              </button>
+
+              <button
+                type="submit"
+                className="pill-button pill-ember"
+                disabled={isProcessing}
+                style={{ padding: '10px 24px' }}
+              >
+                {isProcessing ? 'Verifying Answers...' : 'Request Audit →'}
+              </button>
+            </div>
           </div>
         </form>
 
-        {/* Categorized Verdict Taxonomy Specimen Tray */}
+        {/* Categorized Verdict Taxonomy Specimen Tray (5.6px sharp cards, Iron Border hairlines) */}
         <section className="specimen-card" style={{ marginTop: 'var(--spacing-16)' }}>
-          <div className="section-heading" style={{ fontSize: '20px', marginBottom: 'var(--spacing-16)' }}>
-            <span className="heading-glyph">✦</span> Categorization Taxonomy
+          <div className="card-header-bar">
+            <span className="card-label">CATEGORIZATION TAXONOMY</span>
+            <span className="card-metadata">RIGOROUS EVIDENCE MAPPING</span>
           </div>
-          <p className="prose-text" style={{ fontSize: '14px', color: 'var(--color-mist)', marginBottom: 'var(--spacing-24)' }}>
-            Claims are audited strictly against verified evidence without hallucinations or presumptions:
+          <p className="prose-text" style={{ fontSize: '13.5px', marginBottom: 'var(--spacing-20)' }}>
+            Every atomic claim extracted from the AI reply is categorized into four mutually exclusive operational verdicts:
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--spacing-16)' }}>
-            <div style={{ background: 'var(--color-cosmic-void)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(229, 231, 235, 0.08)' }}>
+            <div style={{ background: 'var(--color-void-canvas)', padding: '16px', borderRadius: '5.6px', border: '1px solid var(--color-iron-border)' }}>
               <div className="verdict-specimen-badge badge-supported" style={{ marginBottom: '8px' }}>
-                Supported / Correct
+                SUPPORTED
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
-                Directly substantiated by verified text passages in reference documents or authoritative consensus.
+              <p style={{ fontSize: '13px', color: 'var(--color-zinc-mute)', margin: 0 }}>
+                Directly corroborated by verified passages in the reference record.
               </p>
             </div>
 
-            <div style={{ background: 'var(--color-cosmic-void)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(229, 231, 235, 0.08)' }}>
+            <div style={{ background: 'var(--color-void-canvas)', padding: '16px', borderRadius: '5.6px', border: '1px solid var(--color-iron-border)' }}>
               <div className="verdict-specimen-badge badge-contradicted" style={{ marginBottom: '8px' }}>
-                Contradicted
+                CONTRADICTED
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-zinc-mute)', margin: 0 }}>
                 Directly refuted or conflicted by verified factual statements.
               </p>
             </div>
 
-            <div style={{ background: 'var(--color-cosmic-void)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(229, 231, 235, 0.08)' }}>
+            <div style={{ background: 'var(--color-void-canvas)', padding: '16px', borderRadius: '5.6px', border: '1px solid var(--color-iron-border)' }}>
               <div className="verdict-specimen-badge badge-insufficient" style={{ marginBottom: '8px' }}>
-                Insufficient Evidence
+                INSUFFICIENT
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-zinc-mute)', margin: 0 }}>
                 Reference records lack conclusive facts to confirm or deny. Never presumed false.
               </p>
             </div>
 
-            <div style={{ background: 'var(--color-cosmic-void)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(229, 231, 235, 0.08)' }}>
+            <div style={{ background: 'var(--color-void-canvas)', padding: '16px', borderRadius: '5.6px', border: '1px solid var(--color-iron-border)' }}>
               <div className="verdict-specimen-badge badge-ambiguous" style={{ marginBottom: '8px' }}>
-                Ambiguous
+                AMBIGUOUS
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--color-mist)', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-zinc-mute)', margin: 0 }}>
                 Evidence or statement wording supports multiple materially distinct interpretations.
               </p>
             </div>
