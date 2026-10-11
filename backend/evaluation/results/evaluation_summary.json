@@ -1,0 +1,1059 @@
+{
+  "dataset_version": "1.0.0",
+  "quotation_dataset_version": "1.0.0",
+  "timestamp": "2026-10-10T23:20:20.910666+00:00",
+  "retrieval_evaluation": {
+    "total_fixtures": 20,
+    "positive_fixtures": 18,
+    "negative_fixtures": 2,
+    "recall_at_1": 0.9444,
+    "recall_at_3": 0.9444,
+    "recall_at_5": 0.9444,
+    "mrr": 0.9444,
+    "negative_detection_rate": 1.0,
+    "by_category": {
+      "direct_support": {
+        "total_fixtures": 2,
+        "positive_fixtures": 2,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "direct_contradiction": {
+        "total_fixtures": 2,
+        "positive_fixtures": 2,
+        "recall_at_1": 0.5,
+        "recall_at_3": 0.5,
+        "recall_at_5": 0.5,
+        "mrr": 0.5
+      },
+      "partial_support": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "irrelevant_evidence": {
+        "total_fixtures": 1,
+        "positive_fixtures": 0,
+        "recall_at_1": 0.0,
+        "recall_at_3": 0.0,
+        "recall_at_5": 0.0,
+        "mrr": 0.0
+      },
+      "conflicting_sources": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "paraphrased_evidence_low_lexical_overlap": {
+        "total_fixtures": 2,
+        "positive_fixtures": 2,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "numeric_claims_and_units": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "dates_populations_conditions": {
+        "total_fixtures": 2,
+        "positive_fixtures": 2,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "missing_qualifiers_overgeneralization": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "compound_claims": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "evidence_split_across_boundary": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "no_relevant_evidence": {
+        "total_fixtures": 1,
+        "positive_fixtures": 0,
+        "recall_at_1": 0.0,
+        "recall_at_3": 0.0,
+        "recall_at_5": 0.0,
+        "mrr": 0.0
+      },
+      "mixed_passages": {
+        "total_fixtures": 2,
+        "positive_fixtures": 2,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "multiple_sources": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      },
+      "reconciled_conditions_not_conflicting": {
+        "total_fixtures": 1,
+        "positive_fixtures": 1,
+        "recall_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "recall_at_5": 1.0,
+        "mrr": 1.0
+      }
+    },
+    "fixture_results": [
+      {
+        "fixture_id": "fx-01-direct-support",
+        "category": "direct_support",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "The James Webb Space Telescope was successfully launched on December 25, 2021, from the Guiana Space Centre aboard an Ariane 5 rocket. The mission is an international collaboration between NASA, ESA, and CSA."
+        ]
+      },
+      {
+        "fixture_id": "fx-02-direct-contradiction",
+        "category": "direct_contradiction",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Mars has only two natural satellites, Phobos and Deimos, both discovered by American astronomer Asaph Hall in August 1877. Both are irregularly shaped rocky bodies with low masses."
+        ]
+      },
+      {
+        "fixture_id": "fx-03-partial-support",
+        "category": "partial_support",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Alexander Fleming observed antibacterial properties in penicillium mold at St Mary's Hospital in London in 1928. However, Fleming did not have the chemical resources to isolate or mass-produce the substance himself."
+        ]
+      },
+      {
+        "fixture_id": "fx-04-irrelevant-evidence",
+        "category": "irrelevant_evidence",
+        "is_negative": true,
+        "num_candidates_retrieved": 0,
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false,
+        "reciprocal_rank": 0.0,
+        "retrieved_excerpts": []
+      },
+      {
+        "fixture_id": "fx-05-conflicting-sources",
+        "category": "conflicting_sources",
+        "is_negative": false,
+        "num_candidates_retrieved": 2,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Carbon dating of timber recovered from the northern tower establishes construction in 1340 CE.",
+          "Official charter logs indicate municipal construction of the northern tower commenced in 1415 CE."
+        ]
+      },
+      {
+        "fixture_id": "fx-06-paraphrased-low-overlap",
+        "category": "paraphrased_evidence_low_lexical_overlap",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Intense geomagnetic disturbances from coronal mass ejections precipitated voltage collapse and prolonged blackouts across high-latitude electrical transmission networks."
+        ]
+      },
+      {
+        "fixture_id": "fx-07-numeric-unit-difference",
+        "category": "numeric_claims_and_units",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "The suspension span across the estuary measures exactly 1,500 meters in total deck length."
+        ]
+      },
+      {
+        "fixture_id": "fx-08-condition-population-difference",
+        "category": "dates_populations_conditions",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "In a multicenter trial of pediatric asthma patients under 12 years of age, the inhaled formulation demonstrated an 88 percent reduction in acute exacerbations during the 2022 testing window."
+        ]
+      },
+      {
+        "fixture_id": "fx-09-missing-qualifiers",
+        "category": "missing_qualifiers_overgeneralization",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Under laboratory conditions, moderate daily dietary polyphenol intake may sometimes contribute to modest improvements in arterial elasticity in certain adult cohorts."
+        ]
+      },
+      {
+        "fixture_id": "fx-10-compound-one-supported",
+        "category": "compound_claims",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Apollo 11 astronaut Neil Armstrong stepped onto the lunar surface at 02:56 UTC on July 21, 1969, becoming the first human to walk on the Moon."
+        ]
+      },
+      {
+        "fixture_id": "fx-11-split-across-boundary",
+        "category": "evidence_split_across_boundary",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Project Borealis deployed high-altitude balloon telemetry packages from Kiruna, Sweden throughout October 2023.\n\nThe onboard spectrophotometer telemetry confirmed a localized stratospheric ozone recovery of 7.2 percent."
+        ]
+      },
+      {
+        "fixture_id": "fx-12-no-relevant-evidence",
+        "category": "no_relevant_evidence",
+        "is_negative": true,
+        "num_candidates_retrieved": 0,
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false,
+        "reciprocal_rank": 0.0,
+        "retrieved_excerpts": []
+      },
+      {
+        "fixture_id": "fx-13-mixed-relevant-irrelevant",
+        "category": "mixed_passages",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Section 1: Commercial aviation passenger volumes contracted significantly in early 2020.\n\nSection 2: The global automotive sector suffered an estimated production shortfall of 4.5 million vehicles in 2021 due to acute semiconductor microchip supply chain bottlenecks.\n\nSection 3: Commercial real estate occupancy rates exhibited regional divergence throughout Europe."
+        ]
+      },
+      {
+        "fixture_id": "fx-14-multiple-sources",
+        "category": "multiple_sources",
+        "is_negative": false,
+        "num_candidates_retrieved": 2,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Titanium-aluminide alloys are selected for low-pressure turbine blades due to high specific strength at 700C.",
+          "Single-crystal nickel superalloys remain standard for high-pressure turbine combustor liners."
+        ]
+      },
+      {
+        "fixture_id": "fx-15-reconciled-conditions",
+        "category": "reconciled_conditions_not_conflicting",
+        "is_negative": false,
+        "num_candidates_retrieved": 2,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "During the clear summer peak in July, the photovoltaic array produced a daily average of 420 megawatt-hours.",
+          "During December overcast conditions, the photovoltaic array produced a daily average of 110 megawatt-hours."
+        ]
+      },
+      {
+        "fixture_id": "fx-16-multiple-supporting-passages",
+        "category": "direct_support",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "The Valdivia earthquake struck southern Chile on May 22, 1960. It registered a moment magnitude of 9.5, making it the most powerful earthquake ever instrumentally recorded. Tsunami waves crossed the Pacific Basin."
+        ]
+      },
+      {
+        "fixture_id": "fx-17-contradiction-explicit",
+        "category": "direct_contradiction",
+        "is_negative": false,
+        "num_candidates_retrieved": 0,
+        "first_relevant_rank": null,
+        "hit_at_1": false,
+        "hit_at_3": false,
+        "hit_at_5": false,
+        "reciprocal_rank": 0.0,
+        "retrieved_excerpts": []
+      },
+      {
+        "fixture_id": "fx-18-date-mismatch-unsupported",
+        "category": "dates_populations_conditions",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "The automated subway signaling system operated without unscheduled interruptions throughout the calendar year 2018."
+        ]
+      },
+      {
+        "fixture_id": "fx-19-distinct-distractor-documents",
+        "category": "mixed_passages",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Silicon carbide power MOSFETs operate with lower conduction losses and higher thermal conductivity than silicon."
+        ]
+      },
+      {
+        "fixture_id": "fx-20-paraphrase-synonym-overlap",
+        "category": "paraphrased_evidence_low_lexical_overlap",
+        "is_negative": false,
+        "num_candidates_retrieved": 1,
+        "first_relevant_rank": 1,
+        "hit_at_1": true,
+        "hit_at_3": true,
+        "hit_at_5": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_excerpts": [
+          "Chlorofluorocarbons release active chlorine radicals upon photolysis, catalytically degrading stratospheric ozone molecules."
+        ]
+      }
+    ]
+  },
+  "verdict_evaluation": {
+    "total_fixtures": 20,
+    "correct_verdicts": 19,
+    "overall_accuracy": 0.95,
+    "confusion_matrix": {
+      "supported": {
+        "supported": 9,
+        "contradicted": 0,
+        "insufficiently_supported": 0,
+        "ambiguous": 0
+      },
+      "contradicted": {
+        "supported": 0,
+        "contradicted": 2,
+        "insufficiently_supported": 1,
+        "ambiguous": 0
+      },
+      "insufficiently_supported": {
+        "supported": 0,
+        "contradicted": 0,
+        "insufficiently_supported": 7,
+        "ambiguous": 0
+      },
+      "ambiguous": {
+        "supported": 0,
+        "contradicted": 0,
+        "insufficiently_supported": 0,
+        "ambiguous": 1
+      }
+    },
+    "per_verdict_metrics": {
+      "supported": {
+        "true_positives": 9,
+        "total_expected": 9,
+        "total_predicted": 9,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "contradicted": {
+        "true_positives": 2,
+        "total_expected": 3,
+        "total_predicted": 2,
+        "precision": 1.0,
+        "recall": 0.6667
+      },
+      "insufficiently_supported": {
+        "true_positives": 7,
+        "total_expected": 7,
+        "total_predicted": 8,
+        "precision": 0.875,
+        "recall": 1.0
+      },
+      "ambiguous": {
+        "true_positives": 1,
+        "total_expected": 1,
+        "total_predicted": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "by_category_accuracy": {
+      "direct_support": {
+        "total": 2,
+        "correct": 2,
+        "accuracy": 1.0
+      },
+      "direct_contradiction": {
+        "total": 2,
+        "correct": 1,
+        "accuracy": 0.5
+      },
+      "partial_support": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "irrelevant_evidence": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "conflicting_sources": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "paraphrased_evidence_low_lexical_overlap": {
+        "total": 2,
+        "correct": 2,
+        "accuracy": 1.0
+      },
+      "numeric_claims_and_units": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "dates_populations_conditions": {
+        "total": 2,
+        "correct": 2,
+        "accuracy": 1.0
+      },
+      "missing_qualifiers_overgeneralization": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "compound_claims": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "evidence_split_across_boundary": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "no_relevant_evidence": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "mixed_passages": {
+        "total": 2,
+        "correct": 2,
+        "accuracy": 1.0
+      },
+      "multiple_sources": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      },
+      "reconciled_conditions_not_conflicting": {
+        "total": 1,
+        "correct": 1,
+        "accuracy": 1.0
+      }
+    },
+    "correct_abstention_rate": 1.0,
+    "adversarial_tests": {
+      "fabricated_id_rejection_rate": 1.0,
+      "malformed_output_rejection_rate": 1.0,
+      "inconsistent_verdict_rejection_rate": 1.0,
+      "operational_failure_leakage_to_factual_verdict": 0
+    },
+    "fixture_details": [
+      {
+        "fixture_id": "fx-01-direct-support",
+        "category": "direct_support",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-02-direct-contradiction",
+        "category": "direct_contradiction",
+        "expected_verdict": "contradicted",
+        "actual_verdict": "contradicted",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-03-partial-support",
+        "category": "partial_support",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-04-irrelevant-evidence",
+        "category": "irrelevant_evidence",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 0,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-05-conflicting-sources",
+        "category": "conflicting_sources",
+        "expected_verdict": "ambiguous",
+        "actual_verdict": "ambiguous",
+        "is_correct": true,
+        "num_candidates": 2,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-06-paraphrased-low-overlap",
+        "category": "paraphrased_evidence_low_lexical_overlap",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-07-numeric-unit-difference",
+        "category": "numeric_claims_and_units",
+        "expected_verdict": "contradicted",
+        "actual_verdict": "contradicted",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-08-condition-population-difference",
+        "category": "dates_populations_conditions",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-09-missing-qualifiers",
+        "category": "missing_qualifiers_overgeneralization",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-10-compound-one-supported",
+        "category": "compound_claims",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-11-split-across-boundary",
+        "category": "evidence_split_across_boundary",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-12-no-relevant-evidence",
+        "category": "no_relevant_evidence",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 0,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-13-mixed-relevant-irrelevant",
+        "category": "mixed_passages",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-14-multiple-sources",
+        "category": "multiple_sources",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 2,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-15-reconciled-conditions",
+        "category": "reconciled_conditions_not_conflicting",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 2,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-16-multiple-supporting-passages",
+        "category": "direct_support",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-17-contradiction-explicit",
+        "category": "direct_contradiction",
+        "expected_verdict": "contradicted",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": false,
+        "num_candidates": 0,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-18-date-mismatch-unsupported",
+        "category": "dates_populations_conditions",
+        "expected_verdict": "insufficiently_supported",
+        "actual_verdict": "insufficiently_supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-19-distinct-distractor-documents",
+        "category": "mixed_passages",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      },
+      {
+        "fixture_id": "fx-20-paraphrase-synonym-overlap",
+        "category": "paraphrased_evidence_low_lexical_overlap",
+        "expected_verdict": "supported",
+        "actual_verdict": "supported",
+        "is_correct": true,
+        "num_candidates": 1,
+        "report_summary_status": "completed"
+      }
+    ]
+  },
+  "retrieval_experiments": {
+    "dataset_size": 20,
+    "baseline": {
+      "strategy": "Baseline (Default)",
+      "description": "Current production defaults: 500-char chunks, 100-char overlap, top-k=3, k1=1.5, b=0.75",
+      "config": {
+        "chunk_size": 500,
+        "chunk_overlap": 100,
+        "top_k": 3,
+        "k1": 1.5,
+        "b": 0.75
+      },
+      "recall_at_1": 0.9444,
+      "recall_at_3": 0.9444,
+      "recall_at_5": 0.9444,
+      "mrr": 0.9444,
+      "negative_detection_rate": 1.0
+    },
+    "strategies": [
+      {
+        "strategy": "Baseline (Default)",
+        "description": "Current production defaults: 500-char chunks, 100-char overlap, top-k=3, k1=1.5, b=0.75",
+        "config": {
+          "chunk_size": 500,
+          "chunk_overlap": 100,
+          "top_k": 3,
+          "k1": 1.5,
+          "b": 0.75
+        },
+        "recall_at_1": 0.9444,
+        "recall_at_3": 0.9444,
+        "recall_at_5": 0.9444,
+        "mrr": 0.9444,
+        "negative_detection_rate": 1.0
+      },
+      {
+        "strategy": "Variant 1 (Fine Chunks)",
+        "description": "Smaller 300-char chunks with 75-char overlap for higher passage density",
+        "config": {
+          "chunk_size": 300,
+          "chunk_overlap": 75,
+          "top_k": 3,
+          "k1": 1.5,
+          "b": 0.75
+        },
+        "recall_at_1": 0.9444,
+        "recall_at_3": 0.9444,
+        "recall_at_5": 0.9444,
+        "mrr": 0.9444,
+        "negative_detection_rate": 1.0
+      },
+      {
+        "strategy": "Variant 2 (Broad Chunks)",
+        "description": "Larger 750-char chunks with 150-char overlap to capture wider surrounding context",
+        "config": {
+          "chunk_size": 750,
+          "chunk_overlap": 150,
+          "top_k": 3,
+          "k1": 1.5,
+          "b": 0.75
+        },
+        "recall_at_1": 0.9444,
+        "recall_at_3": 0.9444,
+        "recall_at_5": 0.9444,
+        "mrr": 0.9444,
+        "negative_detection_rate": 1.0
+      },
+      {
+        "strategy": "Variant 3 (Top-K=5)",
+        "description": "Extended retrieval window returning top-5 candidate passages to model assessor",
+        "config": {
+          "chunk_size": 500,
+          "chunk_overlap": 100,
+          "top_k": 5,
+          "k1": 1.5,
+          "b": 0.75
+        },
+        "recall_at_1": 0.9444,
+        "recall_at_3": 0.9444,
+        "recall_at_5": 0.9444,
+        "mrr": 0.9444,
+        "negative_detection_rate": 1.0
+      },
+      {
+        "strategy": "Variant 4 (BM25 Tuned)",
+        "description": "Alternative saturation k1=1.2, length penalty b=0.8",
+        "config": {
+          "chunk_size": 500,
+          "chunk_overlap": 100,
+          "top_k": 3,
+          "k1": 1.2,
+          "b": 0.8
+        },
+        "recall_at_1": 0.9444,
+        "recall_at_3": 0.9444,
+        "recall_at_5": 0.9444,
+        "mrr": 0.9444,
+        "negative_detection_rate": 1.0
+      }
+    ],
+    "recommendation": "Keep Baseline as production default. The current baseline achieves strong Recall and MRR without introducing the token overhead of Top-K=5 or the fragmentation risks of 300-char chunks."
+  },
+  "quotation_evaluation": {
+    "dataset_version": "1.0.0",
+    "total_fixtures": 12,
+    "correct_matches": 12,
+    "overall_accuracy": 1.0,
+    "confusion_matrix": {
+      "exact_match": {
+        "exact_match": 4,
+        "normalized_match": 0,
+        "altered_quote": 0,
+        "partial_match": 0,
+        "unverifiable": 0
+      },
+      "normalized_match": {
+        "exact_match": 0,
+        "normalized_match": 2,
+        "altered_quote": 0,
+        "partial_match": 0,
+        "unverifiable": 0
+      },
+      "altered_quote": {
+        "exact_match": 0,
+        "normalized_match": 0,
+        "altered_quote": 3,
+        "partial_match": 0,
+        "unverifiable": 0
+      },
+      "partial_match": {
+        "exact_match": 0,
+        "normalized_match": 0,
+        "altered_quote": 0,
+        "partial_match": 1,
+        "unverifiable": 0
+      },
+      "unverifiable": {
+        "exact_match": 0,
+        "normalized_match": 0,
+        "altered_quote": 0,
+        "partial_match": 0,
+        "unverifiable": 2
+      }
+    },
+    "per_outcome_metrics": {
+      "exact_match": {
+        "total_expected": 4,
+        "total_predicted": 4,
+        "true_positives": 4,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "normalized_match": {
+        "total_expected": 2,
+        "total_predicted": 2,
+        "true_positives": 2,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "altered_quote": {
+        "total_expected": 3,
+        "total_predicted": 3,
+        "true_positives": 3,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "partial_match": {
+        "total_expected": 1,
+        "total_predicted": 1,
+        "true_positives": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "unverifiable": {
+        "total_expected": 2,
+        "total_predicted": 2,
+        "true_positives": 2,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "fixtures": [
+      {
+        "fixture_id": "qfix-01-exact-text",
+        "category": "exact_match",
+        "quotation": "Python was created in late 1989 by Guido van Rossum.",
+        "expected": "exact_match",
+        "predicted": "exact_match",
+        "is_correct": true,
+        "match_method": "exact",
+        "differences": null,
+        "notes": "Exact word-for-word substring present in reference text."
+      },
+      {
+        "fixture_id": "qfix-02-exact-pdf",
+        "category": "exact_match",
+        "quotation": "All members must register prior to October 15.",
+        "expected": "exact_match",
+        "predicted": "exact_match",
+        "is_correct": true,
+        "match_method": "exact",
+        "differences": null,
+        "notes": "Exact substring located on page 2 of PDF reference document."
+      },
+      {
+        "fixture_id": "qfix-03-norm-curly-quotes",
+        "category": "normalized_match",
+        "quotation": "Data science requires mathematics, statistics, and programming.",
+        "expected": "normalized_match",
+        "predicted": "normalized_match",
+        "is_correct": true,
+        "match_method": "normalized",
+        "differences": "Matched with permitted whitespace, quotation mark, or dash normalization.",
+        "notes": "Matches under whitespace collapse and smart quote folding."
+      },
+      {
+        "fixture_id": "qfix-04-norm-dashes",
+        "category": "normalized_match",
+        "quotation": "Step 1 - Initialize the primary cluster before running migrations.",
+        "expected": "normalized_match",
+        "predicted": "normalized_match",
+        "is_correct": true,
+        "match_method": "normalized",
+        "differences": "Matched with permitted whitespace, quotation mark, or dash normalization.",
+        "notes": "Matches with em-dash to hyphen normalization."
+      },
+      {
+        "fixture_id": "qfix-05-altered-number",
+        "category": "altered_quote",
+        "quotation": "The algorithm achieves 98.4% accuracy across the entire test set.",
+        "expected": "altered_quote",
+        "predicted": "altered_quote",
+        "is_correct": true,
+        "match_method": "alignment",
+        "differences": "Number altered: quote contains ['98.4'], reference text contains ['91.4'].",
+        "notes": "Number discrepancy: quote states 98.4% but source states 91.4%."
+      },
+      {
+        "fixture_id": "qfix-06-altered-negation",
+        "category": "altered_quote",
+        "quotation": "The executive committee did recommend the immediate restructuring.",
+        "expected": "altered_quote",
+        "predicted": "altered_quote",
+        "is_correct": true,
+        "match_method": "alignment",
+        "differences": "Negation altered: quote omits negation, while reference text includes it.",
+        "notes": "Negation inverted: source states 'did not recommend', quote states 'did recommend'."
+      },
+      {
+        "fixture_id": "qfix-07-altered-words",
+        "category": "altered_quote",
+        "quotation": "Employees are forbidden from working remotely on Mondays and Fridays.",
+        "expected": "altered_quote",
+        "predicted": "altered_quote",
+        "is_correct": true,
+        "match_method": "alignment",
+        "differences": "Wording altered: reference text reads 'Employees are discouraged from working remotely on Mondays and Fridays....'.",
+        "notes": "Substantive word alteration: 'forbidden' vs 'discouraged'."
+      },
+      {
+        "fixture_id": "qfix-08-partial-match",
+        "category": "partial_match",
+        "quotation": "The new facility opens in June and will employ five hundred local engineers.",
+        "expected": "partial_match",
+        "predicted": "partial_match",
+        "is_correct": true,
+        "match_method": "alignment",
+        "differences": "Partial match: reference text contains 6 of 13 words from the quotation.",
+        "notes": "First half matches ('The new facility opens in June') but remainder is absent from source."
+      },
+      {
+        "fixture_id": "qfix-09-unverifiable-absent",
+        "category": "unverifiable",
+        "quotation": "We will never sacrifice user privacy for advertising dollars.",
+        "expected": "unverifiable",
+        "predicted": "unverifiable",
+        "is_correct": true,
+        "match_method": "unverifiable",
+        "differences": "Quotation was not located in user-supplied reference material. Available evidence is insufficient to verify authenticity (does not confirm fabrication).",
+        "notes": "Reference sources do not mention user privacy or the founder's quote."
+      },
+      {
+        "fixture_id": "qfix-10-unverifiable-topic-match",
+        "category": "unverifiable",
+        "quotation": "Quantum supremacy will be achieved before the end of the current decade.",
+        "expected": "unverifiable",
+        "predicted": "unverifiable",
+        "is_correct": true,
+        "match_method": "unverifiable",
+        "differences": "Quotation was not located in user-supplied reference material. Available evidence is insufficient to verify authenticity (does not confirm fabrication).",
+        "notes": "Source discusses quantum computing but contains no statement predicting the decade."
+      },
+      {
+        "fixture_id": "qfix-11-cross-page-pdf",
+        "category": "exact_match",
+        "quotation": "Encryption keys must be rotated every ninety days without exception.",
+        "expected": "exact_match",
+        "predicted": "exact_match",
+        "is_correct": true,
+        "match_method": "exact_cross_page",
+        "differences": "Quotation spans across PDF page boundary between pages 1 and 2.",
+        "notes": "Quotation cleanly spans across PDF page boundary between page 1 and page 2."
+      },
+      {
+        "fixture_id": "qfix-12-multiple-quotes",
+        "category": "exact_match",
+        "quotation": "Keep your distance.",
+        "expected": "exact_match",
+        "predicted": "exact_match",
+        "is_correct": true,
+        "match_method": "exact",
+        "differences": null,
+        "notes": "Multiple quotes in answer verified independently."
+      }
+    ]
+  }
+}
