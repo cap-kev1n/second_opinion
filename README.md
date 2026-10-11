@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Second Opinion
 
 > **AI Answer Verification Platform**  
@@ -426,3 +427,6 @@ When claim extraction, assessment, or quotation auditing is triggered, user-subm
 - **Out of Scope for MVP:** User authentication, external web scraping, vector databases, multi-agent frameworks, OCR for scanned images.
 
 
+=======
+# second_opinion
+>>>>>>> cbac2e49076133e07389d83439439613b356beec
